@@ -1,0 +1,105 @@
+Table of Contents
+=================
+1. Soft IP Driver Example
+2. Application Examples
+
+
+1. Soft IP Driver Example
+=========================
+GPIO driver for soft PIO in the FPGA domain serves as a reference for
+writing a simple driver in Linux. The source code of this driver is located in
+Linux source directory under the folder drivers/gpio/gpio-altera.c. The Linux
+source code can be obtained via git.rocketboards.org. The specification
+of soft PIO can be found in Embedded Peripherals IP User Guide - Altera
+(http://www.altera.com.my/literature/ug/ug_embedded_ip.pdf).
+
+NOTE:
+This example does not serve as a full guideline on how to write a Linux Device
+Driver. For full guidelines, please refer to Linux Device Driver reference book
+(http://lwn.net/Kernel/LDD3/)
+
+In this reference design, soft PIO kernel module and leds_gpio kernel module are
+modprobe by default when boot into Linux. User will need to modprobe the modules
+via command below if these modules are not inserted yet. Modprobe of this
+module is a prerequisite to run any applications in section 2.
+	modprobe gpio-altera
+
+
+2. Application Examples
+=======================
+Users may run applications (LED control, detect interrupts from push
+buttons and DIP switches, etc) built into Linux file system on the board from
+Linux console over ssh or serial connection.
+
+These examples serve as references for users to write their own applications
+to interact with soft IP through driver developed.
+
+The source codes of these applications can be found from the installation path
+of  (<Yocto_install_path>/meta-altera/recipes-gsrd).
+
+The binaries of these applications can be found in /home/root/altera/. Please
+'cd' to /home/root/altera to execute these applications.
+
+Example applications usages are shown below, the example applications are based
+on soft PIO driver described in Section 1.
+
+
+Applications to exercise soft PIO driver - LED control
+------------------------------------------------------
+Blinking a particular FPGA LED with specified delay:
+	./blink <LED number> <blink delay in ms>
+	./blink			; help message
+Toggling a particular FPGA LED ON/OFF:
+	./toggle <LED number> <0 or 1>	; 0:OFF, 1:ON)
+	./toggle			; help message
+Scrolling FPGA LEDs with specified delay:
+	./scroll_client <delay in ms> 	; if > 0 then scrolling LEDs light
+	./scroll_client 0		; if == 0 then read scrolling delay
+	./scroll_client -1		; if < 0 then stop scrolling
+	./scroll_client	      		; help message
+
+
+Application to register interrupt and write simple interrupt service routine
+----------------------------------------------------------------------------
+Detect user input from push button / DIP switch:
+	modprobe gpio_interrupt gpio_number=<n>
+
+When user presses the button or flips the dip switch, a message will be printed
+to kernel console.
+1. If the user connects to the console on board using serial connection,
+the message "Interrupt happened at gpio:<gpio_number>" will be printed on the
+console.
+2. If the user connects to the console on board using ssh, the message can be
+viewed from kernel log via "dmesg" command.
+
+Note: User will need to do "rmmod gpio_interrupt" prior in order to change
+gpio_number by calling "modprobe gpio_interrupt gpio_number=<n>" again
+
+User will need to get the GPIO number from /sys/class/gpio/ by using
+command 'ls'. E.g.
+
+	root@socfpga~:# ls /sys/class/gpio/
+	gpiochip150	gpiochip152	gpiochip156	gpiochip160
+	gpiochip192	gpiochip224
+
+From the listing, n can be obtained. The GPIO number may vary for different
+design with different device tree entries; this is due to the GPIO numbers are
+auto-assign by the kernel.
+
+To confirm the n is associated to which peripheral, user needs to match the
+label of the GPIO chip to the address of push button and DIP switch in device
+tree.
+e.g.
+	root@socfpga~:# cat /sys/class/gpio/gpiochip150/label
+	/sopc@0/bridge@0xc0000000/gpio@0x1000100C0
+
+In this reference design, DIP switch is at address 0x10080 while the push button
+is at address 0x100c0. So in this case GPIO number 150 - 151 are allocated to
+push button 0 - 1.
+
+
+Hello world application from HPS
+--------------------------------
+Print "Hello SoC FPGA!" message from HPS:
+	./hello
+
