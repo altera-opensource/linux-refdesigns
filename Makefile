@@ -1,4 +1,4 @@
-DIRS=led_control hello blink toggle scroll_server scroll_client
+DIRS=led_control hello blink toggle scroll_server scroll_client syschk
 
 all:
 	@for subd in $(DIRS); do \
