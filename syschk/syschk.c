@@ -141,6 +141,14 @@ void print_all_hwmon() {
 	return;
 }
 
+/* Check if the text will overflow to the next line and trim as necessary */
+void trim_overflow_characters(char *text) {
+	int char_overflow = (strlen(text) + maxcol / 2 + INDENT) - maxcol + 2;
+
+	if (char_overflow > 0)
+		text[strlen(text) - char_overflow] = '\0';
+}
+
 void print_usb() {
 	DIR *dir;
 	struct dirent *ent;
@@ -158,6 +166,7 @@ void print_usb() {
 			strcat(filename, ent->d_name);
 			strcat(filename, "/product");
 			value = read_fs(filename);
+			trim_overflow_characters(value);
 			mvprintw(row2, maxcol/2, "%s", ent->d_name);
 			mvprintw(row2++, maxcol/2+INDENT, ": %s", value);
 			free(filename);
