@@ -267,7 +267,7 @@ void print_ip() {
 	int fd;
 	struct ifreq ifr;
 
-	if((fd = socket(AF_INET, SOCK_DGRAM, 0) < 0)) {
+	if((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
 		mvprintw(row, 0, "IPv4 Address");
 		mvprintw(row++, INDENT, ": N/A");
 	}
