@@ -58,7 +58,7 @@ static int __init gpio_interrupt_init(void)
 
 	irq_number = gpio_to_irq(gpio_number);
 
-	r = request_irq(irq_number, gpio_isr, IRQF_DISABLED, 0, 0);
+	r = request_irq(irq_number, gpio_isr, 0, 0, 0);
 	if (r) {
 		pr_err("Failure requesting irq %i\n", irq_number);
 		return r;
