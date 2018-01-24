@@ -130,6 +130,8 @@ static int epdma_probe(struct pci_dev *pdev,
 	struct pci_dev *rpdev;
 	void __iomem   *csrbar_base;
 	struct dma_device *dmadev;
+	u32 ocmbar_read;
+	u32 csrbar_read;
 
 	dmadev = devm_kzalloc(&pdev->dev, sizeof(*dmadev), GFP_KERNEL);
 	if (!dmadev)
@@ -179,6 +181,13 @@ static int epdma_probe(struct pci_dev *pdev,
 		dev_err(&pdev->dev, "failed to map EP CSR region\n");
 		return err;
 	}
+
+    //csr_writel(dmadev->epocm, 0, 0xDEAD);
+	ocmbar_read = csr_readl(dmadev->epocm, 0x0);
+	printk("BAR0 ADDR0 %x\n",ocmbar_read);
+
+	//csrbar_read = csr_readl(csrbar_base, 0x4000);
+	//printk("BAR1 ADDR4000 %x\n",csrbar_read);
 
 	dmadev->epcra = csrbar_base + EP_HIP_CRA_AVOFF;
 	dmadev->dmacsr = csrbar_base + EP_DMA_CSR_AVOFF;

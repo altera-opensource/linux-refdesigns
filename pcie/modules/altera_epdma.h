@@ -43,6 +43,7 @@
 #define EP_DMA_IRQ_A2P		BIT(0)
 #define EP_DMA2OCRAM_BASE	0x80000000	/* DMA to onchip RAM offset */
 #define EP_DMA2OCRAM_ADDR	EP_DMA2OCRAM_BASE
+#define EP_DMA2OCR_OFF		0x40000000
 
 /* EP registers offset */
 #define A2P_INT_STS_REG		0x0040

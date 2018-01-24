@@ -43,6 +43,7 @@
 /* This defines how far the indentation of key to value */
 #define INDENT 22
 #define MAX_TEXT_OUTPUT 30
+#define STRSIZE 64
 
 /* The current row to be written to. row2 stores current row for 2nd column */
 int row, row2;
@@ -57,7 +58,7 @@ char* read_fs(const char *node) {
 
 	fd = fopen(node, "r");
 	if (!fd) {
-		strcpy(buff, "N/A");
+		strncpy(buff, "N/A", STRSIZE-1);
 		return buff;
 	}
 	fgets(buff, MAX_TEXT_OUTPUT, fd);
@@ -79,17 +80,19 @@ char* get_i2c_hwmon(char *i2c_address, char *pmbusname, char *type) {
 	label = strtok(pmbusname, "_");
 	filename = malloc((30 +
 		strlen(i2c_address))*sizeof(char) + strlen(label));
-	strcpy(filename, "/sys/bus/i2c/devices/");
-	strcat(filename, i2c_address);
-	strcat(filename, "/");
-	strcat(filename, label);
-	strcat(filename, type);
+	strncpy(filename, "/sys/bus/i2c/devices/", STRSIZE-1);
+	strncat(filename, i2c_address, STRSIZE-1);
+	strncat(filename, "/", STRSIZE-1);
+	strncat(filename, label, STRSIZE-1);
+	strncat(filename, type, STRSIZE-1);
 	print = read_fs(filename);
 	free(filename);
 
 	return print;
 }
 
+/* Coverity Fix Defect Id 125056 */
+/* Coverity Fix Defect Id 125057 */
 void print_hwmon(char *device, char *i2c_address) {
 	DIR *pmbusdir;
 	struct dirent *pmbusent;
@@ -97,15 +100,14 @@ void print_hwmon(char *device, char *i2c_address) {
 	if ((pmbusdir = opendir(device)) != NULL) {
 		while ((pmbusent = readdir(pmbusdir)) != NULL) {
 			if(strstr(pmbusent->d_name, "_label") != 0) {
-				char *print = get_i2c_hwmon(i2c_address,
+				char *print_lbl = get_i2c_hwmon(i2c_address,
 					pmbusent->d_name, "_label");
-				mvprintw(row, 0, "%s", print);
-				free(print);
-
-				get_i2c_hwmon(i2c_address,
+				mvprintw(row, 0, "%s", print_lbl);
+				free(print_lbl);
+				char *print_input  = get_i2c_hwmon(i2c_address,
 					pmbusent->d_name, "_input");
-				mvprintw(row++, INDENT, ": %s", print);
-				free(print);
+				mvprintw(row++, INDENT, ": %s", print_input);
+				free(print_input);
 			}
 		}
 		row++;
@@ -124,13 +126,13 @@ void print_all_hwmon() {
 					strcmp(ent->d_name, "..") == 0)
 				continue;
 			filename = malloc(27 + strlen(ent->d_name));
-			strcpy(filename, "/sys/bus/i2c/devices/");
-			strcat(filename, ent->d_name);
-			strcat(filename, "/name");
+			strncpy(filename, "/sys/bus/i2c/devices/", STRSIZE-1);
+			strncat(filename, ent->d_name, STRSIZE-1);
+			strncat(filename, "/name", STRSIZE-1);
 			char *value = read_fs(filename);
 			if (strcmp(value, "pmbus") == 0) {
-				strcpy(filename, "/sys/bus/i2c/devices/");
-				strcat(filename, ent->d_name);
+				strncpy(filename, "/sys/bus/i2c/devices/", STRSIZE-1);
+				strncat(filename, ent->d_name, STRSIZE-1);
 				print_hwmon(filename, ent->d_name);
 			}
 			free(filename);
@@ -162,9 +164,9 @@ void print_usb() {
 					strstr(ent->d_name, "usb") == 0)
 				continue;
 			filename = malloc(30 + strlen(ent->d_name));
-			strcpy(filename, "/sys/bus/usb/devices/");
-			strcat(filename, ent->d_name);
-			strcat(filename, "/product");
+			strncpy(filename, "/sys/bus/usb/devices/", STRSIZE-1);
+			strncat(filename, ent->d_name, STRSIZE-1);
+			strncat(filename, "/product", STRSIZE-1);
 			value = read_fs(filename);
 			trim_overflow_characters(value);
 			mvprintw(row2, maxcol/2, "%s", ent->d_name);
@@ -189,9 +191,9 @@ void print_sysid() {
 					strstr(ent->d_name, "sysid") == 0)
 				continue;
 			filename = malloc(38 + strlen(ent->d_name));
-			strcpy(filename, "/sys/bus/platform/devices/");
-			strcat(filename, ent->d_name);
-			strcat(filename, "/sysid/id");
+			strncpy(filename, "/sys/bus/platform/devices/", STRSIZE-1);
+			strncat(filename, ent->d_name, STRSIZE-1);
+			strncat(filename, "/sysid/id", STRSIZE-1);
 			value = read_fs(filename);
 			mvprintw(row2, maxcol/2, "%s", ent->d_name);
 			mvprintw(row2++, maxcol/2+INDENT, ": %s", value);
@@ -215,9 +217,9 @@ void print_uart() {
 					strstr(ent->d_name, "serial") == 0)
 				continue;
 			filename = malloc(32 + strlen(ent->d_name));
-			strcpy(filename, "/proc/device-tree/soc/");
-			strcat(filename, ent->d_name);
-			strcat(filename, "/status");
+			strncpy(filename, "/proc/device-tree/soc/", STRSIZE-1);
+			strncat(filename, ent->d_name, STRSIZE-1);
+			strncat(filename, "/status", STRSIZE-1);
 			value = read_fs(filename);
 			mvprintw(row2, maxcol/2, "%s", ent->d_name);
 			mvprintw(row2++, maxcol/2+INDENT, ": %s", value);
@@ -238,6 +240,7 @@ int check_screen() {
 	return true;
 }
 
+/* Coverity Fix Defect Id 125058 */
 void print_leds() {
 	DIR *dir;
 	struct dirent *ent;
@@ -248,10 +251,11 @@ void print_leds() {
 					strcmp(ent->d_name, "..") == 0)
 				continue;
 			filename = malloc(30 + strlen(ent->d_name));
-			strcpy(filename, "/sys/class/leds/");
-			strcat(filename, ent->d_name);
-			strcat(filename, "/brightness");
+			strncpy(filename, "/sys/class/leds/",STRSIZE-1);
+			strncat(filename, ent->d_name, STRSIZE-1);
+			strncat(filename, "/brightness", STRSIZE-1);
 			char *value = read_fs(filename);
+			free(filename);
 			mvprintw(row, 0, "%s", ent->d_name);
 			if(strcmp(value, "1") == 0)
 				mvprintw(row++, INDENT, ": ON");

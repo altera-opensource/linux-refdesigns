@@ -91,8 +91,11 @@ irqreturn_t msgdma_isr(int irq, void *arg)
 	vdest += ((dmadev->datlen / 4) - 1);
 
 	/* wait until last 4 bytes posted write complete */
-	while (*vsrc != *vdest)
-		cnt++;
+	while (*vsrc != *vdest) {
+		if(cnt < MSGDMA_POLL_TIMEOUT)
+			cnt++;
+		else break;
+	}
 
 	/* Stop counter */
 	csr_writel(dmadev->perf_base, PERFCTR_GBL_CLK_CTR_LO_STOP,
@@ -132,7 +135,6 @@ u32 msgdma_transfer(struct dma_device *dmadev, const u32 src_paddr,
 int msgdma_init(void __iomem *dmacsr)
 {
 	int ret;
-
 	ret = msgdma_reset(dmacsr);
 	if (ret)
 		return ret;
@@ -146,6 +148,7 @@ static int block_ioctl(struct block_device *bdev, fmode_t mode,
 {
 	struct dma_device *dmadev = bdev->bd_disk->private_data;
 	u32 timediff;
+	//u32 transtbl;
 
 	switch (cmd) {
 	case GET_SIZE_IOCTL:
@@ -163,6 +166,12 @@ static int block_ioctl(struct block_device *bdev, fmode_t mode,
 	case OCM_RX_IOCTL:
 	case SYS_TX_IOCTL:
 	case SYS_RX_IOCTL:
+
+		//transtbl = csr_readl(dmadev->epcra, A2P_ADDR_MAP_LO0);
+		//printk("Translation table 0x%x\n",transtbl);
+		//printk("CMD 0x%x SRC 0x%x DEST 0x%x LEN %d\n",cmd, dmadev->osrc,
+		//		   dmadev->odest, dmadev->datlen);
+
 		memset(dmadev->vdest, 0, dmadev->datlen);
 		timediff = msgdma_transfer(dmadev, dmadev->osrc,
 					   dmadev->odest, dmadev->datlen);

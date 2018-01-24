@@ -30,6 +30,9 @@
 #define RPDMA_DEV	"/dev/blkrpdma0"
 #define EPDMA_DEV	"/dev/blkepdma0"
 
+static int fdrp;
+static int fdep;
+
 #define PCIERP_DEBUG
 #ifdef PCIERP_DEBUG
 #define PRINT_BYTES		0x100
@@ -37,7 +40,8 @@ static void dump_mismatch(char *tx_data, char *rx_data, unsigned int datlen)
 {
 	int i;
 	unsigned int mismatch = 0;
-	unsigned int firstmismatch;
+	/* Coverity Fix Defect Id 125061 */
+	unsigned int firstmismatch = 0;
 
 	/* find mismatch */
 	for (i = 0; i < datlen; i++) {
@@ -80,8 +84,6 @@ static void dump_mismatch(char *tx_data, char *rx_data, unsigned int datlen)
 static int get_xfer_size(unsigned int *rpdatlen, unsigned int *epdatlen)
 {
 	int err = 0;
-	int fdrp;
-	int fdep;
 
 	/* read EP DMA transfer size */
 	fdep = open(EPDMA_DEV, O_RDWR | O_SYNC);
@@ -100,6 +102,7 @@ static int get_xfer_size(unsigned int *rpdatlen, unsigned int *epdatlen)
 		printf("Failed to open %s\n", RPDMA_DEV);
 		/* No error return, continue for simplified RP design */
 		*rpdatlen = *epdatlen;
+
 		goto err_close_fdep;
 	}
 
@@ -197,6 +200,7 @@ static unsigned int dma_xfer(int is_rp, unsigned int ioctlno, unsigned int ptn,
 			dump_mismatch(tx_data, rx_data, datlen);
 			#endif
 		}
+
 	}
 
 err_close_rx_data:
@@ -253,31 +257,38 @@ int main(void)
 	printf("\t\tSource\t\tDestination\tResults (MB/s)\n");
 	printf("-----------------------------------------------------------\n");
 
-	result = do_trans(1, OCM_TX_IOCTL, PATTERN_MASK_A, datlen);
-	printf("  RP-DMA TX\tRP-OCM\t\tEP-OCM\t\t%d\n", result);
 
-	result = do_trans(1, OCM_RX_IOCTL, PATTERN_MASK_B, datlen);
-	printf("  RP-DMA RX\tEP-OCM\t\tRP-OCM\t\t%d\n", result);
+	if(fdrp != -1) {
+		result = do_trans(1, OCM_TX_IOCTL, PATTERN_MASK_A, datlen);
+		printf("  RP-DMA TX\tRP-OCM\t\tEP-OCM\t\t%d\n", result);
 
-	result = do_trans(1, SYS_TX_IOCTL, PATTERN_MASK_A, datlen);
-	printf("  RP-DMA TX\tRP-SYS\t\tEP-OCM\t\t%d\n", result);
+		result = do_trans(1, OCM_RX_IOCTL, PATTERN_MASK_B, datlen);
+		printf("  RP-DMA RX\tEP-OCM\t\tRP-OCM\t\t%d\n", result);
 
-	result = do_trans(1, SYS_RX_IOCTL, PATTERN_MASK_B, datlen);
-	printf("  RP-DMA RX\tEP-OCM\t\tRP-SYS\t\t%d\n", result);
+		result = do_trans(1, SYS_TX_IOCTL, PATTERN_MASK_A, datlen);
+		printf("  RP-DMA TX\tRP-SYS\t\tEP-OCM\t\t%d\n", result);
+
+		result = do_trans(1, SYS_RX_IOCTL, PATTERN_MASK_B, datlen);
+		printf("  RP-DMA RX\tEP-OCM\t\tRP-SYS\t\t%d\n", result);
+	}
+
 
 	printf("-----------------------------------------------------------\n");
 
-	result = do_trans(0, OCM_TX_IOCTL, PATTERN_MASK_A, datlen);
-	printf("  EP-DMA TX\tEP-OCM\t\tRP-OCM\t\t%d\n", result);
+	if (fdep != -1) {
+		result = do_trans(0, OCM_TX_IOCTL, PATTERN_MASK_A, datlen);
+		printf("  EP-DMA TX\tEP-OCM\t\tRP-OCM\t\t%d\n", result);
 
-	result = do_trans(0, OCM_RX_IOCTL, PATTERN_MASK_B, datlen);
-	printf("  EP-DMA RX\tRP-OCM\t\tEP-OCM\t\t%d\n", result);
+		result = do_trans(0, OCM_RX_IOCTL, PATTERN_MASK_B, datlen);
+		printf("  EP-DMA RX\tRP-OCM\t\tEP-OCM\t\t%d\n", result);
 
-	result = do_trans(0, SYS_TX_IOCTL, PATTERN_MASK_A, datlen);
-	printf("  EP-DMA TX\tEP-OCM\t\tRP-SYS\t\t%d\n", result);
+		result = do_trans(0, SYS_TX_IOCTL, PATTERN_MASK_A, datlen);
+		printf("  EP-DMA TX\tEP-OCM\t\tRP-SYS\t\t%d\n", result);
 
-	result = do_trans(0, SYS_RX_IOCTL, PATTERN_MASK_B, datlen);
-	printf("  EP-DMA RX\tRP-SYS\t\tEP-OCM\t\t%d\n", result);
+		result = do_trans(0, SYS_RX_IOCTL, PATTERN_MASK_B, datlen);
+		printf("  EP-DMA RX\tRP-SYS\t\tEP-OCM\t\t%d\n", result);
+
+	}
 
 	return 0;
 }
