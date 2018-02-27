@@ -36,6 +36,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include "safe_str_lib.h"
 
 #define MIN_WINDOW_SIZE_X 20
 #define MIN_WINDOW_SIZE_Y 80
@@ -58,7 +59,7 @@ char* read_fs(const char *node) {
 
 	fd = fopen(node, "r");
 	if (!fd) {
-		strncpy(buff, "N/A", STRSIZE-1);
+		strcpy_s(buff, STRSIZE-1, "N/A");
 		return buff;
 	}
 	fgets(buff, MAX_TEXT_OUTPUT, fd);
@@ -79,12 +80,12 @@ char* get_i2c_hwmon(char *i2c_address, char *pmbusname, char *type) {
 	char *label, *print, *filename;
 	label = strtok(pmbusname, "_");
 	filename = malloc((30 +
-		strlen(i2c_address))*sizeof(char) + strlen(label));
-	strncpy(filename, "/sys/bus/i2c/devices/", STRSIZE-1);
-	strncat(filename, i2c_address, STRSIZE-1);
-	strncat(filename, "/", STRSIZE-1);
-	strncat(filename, label, STRSIZE-1);
-	strncat(filename, type, STRSIZE-1);
+		strnlen_s(i2c_address, sizeof(i2c_address)))*sizeof(char) + strnlen_s(label, sizeof(label)));
+	strcpy_s(filename, STRSIZE-1, "/sys/bus/i2c/devices/");
+	strcat_s(filename, STRSIZE-1, i2c_address);
+	strcat_s(filename, STRSIZE-1, "/");
+	strcat_s(filename, STRSIZE-1, label);
+	strcat_s(filename, STRSIZE-1, type);
 	print = read_fs(filename);
 	free(filename);
 
@@ -125,14 +126,14 @@ void print_all_hwmon() {
 			if (strcmp(ent->d_name, ".") == 0 ||
 					strcmp(ent->d_name, "..") == 0)
 				continue;
-			filename = malloc(27 + strlen(ent->d_name));
-			strncpy(filename, "/sys/bus/i2c/devices/", STRSIZE-1);
-			strncat(filename, ent->d_name, STRSIZE-1);
-			strncat(filename, "/name", STRSIZE-1);
+			filename = malloc(27 + strnlen_s(ent->d_name, sizeof(ent->d_name)));
+			strcpy_s(filename, STRSIZE-1, "/sys/bus/i2c/devices/");
+			strcat_s(filename, STRSIZE-1, ent->d_name);
+			strcat_s(filename, STRSIZE-1, "/name");
 			char *value = read_fs(filename);
 			if (strcmp(value, "pmbus") == 0) {
-				strncpy(filename, "/sys/bus/i2c/devices/", STRSIZE-1);
-				strncat(filename, ent->d_name, STRSIZE-1);
+				strcpy_s(filename, STRSIZE-1, "/sys/bus/i2c/devices/");
+				strcat_s(filename, STRSIZE-1, ent->d_name);
 				print_hwmon(filename, ent->d_name);
 			}
 			free(filename);
@@ -145,10 +146,10 @@ void print_all_hwmon() {
 
 /* Check if the text will overflow to the next line and trim as necessary */
 void trim_overflow_characters(char *text) {
-	int char_overflow = (strlen(text) + maxcol / 2 + INDENT) - maxcol + 2;
+	int char_overflow = (strnlen_s(text, sizeof(text)) + maxcol / 2 + INDENT) - maxcol + 2;
 
 	if (char_overflow > 0)
-		text[strlen(text) - char_overflow] = '\0';
+		text[strnlen_s(text, sizeof(text)) - char_overflow] = '\0';
 }
 
 void print_usb() {
@@ -163,10 +164,10 @@ void print_usb() {
 					strcmp(ent->d_name, "..") == 0 ||
 					strstr(ent->d_name, "usb") == 0)
 				continue;
-			filename = malloc(30 + strlen(ent->d_name));
-			strncpy(filename, "/sys/bus/usb/devices/", STRSIZE-1);
-			strncat(filename, ent->d_name, STRSIZE-1);
-			strncat(filename, "/product", STRSIZE-1);
+			filename = malloc(30 + strnlen_s(ent->d_name, sizeof(ent->d_name)));
+			strcpy_s(filename, STRSIZE-1, "/sys/bus/usb/devices/");
+			strcat_s(filename, STRSIZE-1, ent->d_name);
+			strcat_s(filename, STRSIZE-1, "/product");
 			value = read_fs(filename);
 			trim_overflow_characters(value);
 			mvprintw(row2, maxcol/2, "%s", ent->d_name);
@@ -190,10 +191,10 @@ void print_sysid() {
 					strcmp(ent->d_name, "..") == 0 ||
 					strstr(ent->d_name, "sysid") == 0)
 				continue;
-			filename = malloc(38 + strlen(ent->d_name));
-			strncpy(filename, "/sys/bus/platform/devices/", STRSIZE-1);
-			strncat(filename, ent->d_name, STRSIZE-1);
-			strncat(filename, "/sysid/id", STRSIZE-1);
+			filename = malloc(38 + strnlen_s(ent->d_name, sizeof(ent->d_name)));
+			strcpy_s(filename, STRSIZE-1, "/sys/bus/platform/devices/");
+			strcat_s(filename, STRSIZE-1, ent->d_name);
+			strcat_s(filename, STRSIZE-1, "/sysid/id");
 			value = read_fs(filename);
 			mvprintw(row2, maxcol/2, "%s", ent->d_name);
 			mvprintw(row2++, maxcol/2+INDENT, ": %s", value);
@@ -216,10 +217,10 @@ void print_uart() {
 					strcmp(ent->d_name, "..") == 0 ||
 					strstr(ent->d_name, "serial") == 0)
 				continue;
-			filename = malloc(32 + strlen(ent->d_name));
-			strncpy(filename, "/proc/device-tree/soc/", STRSIZE-1);
-			strncat(filename, ent->d_name, STRSIZE-1);
-			strncat(filename, "/status", STRSIZE-1);
+			filename = malloc(32 + strnlen_s(ent->d_name, sizeof(ent->d_name)));
+			strcpy_s(filename, STRSIZE-1, "/proc/device-tree/soc/");
+			strcat_s(filename, STRSIZE-1, ent->d_name);
+			strcat_s(filename, STRSIZE-1, "/status");
 			value = read_fs(filename);
 			mvprintw(row2, maxcol/2, "%s", ent->d_name);
 			mvprintw(row2++, maxcol/2+INDENT, ": %s", value);
@@ -250,10 +251,10 @@ void print_leds() {
 			if (strcmp(ent->d_name, ".") == 0 ||
 					strcmp(ent->d_name, "..") == 0)
 				continue;
-			filename = malloc(30 + strlen(ent->d_name));
-			strncpy(filename, "/sys/class/leds/",STRSIZE-1);
-			strncat(filename, ent->d_name, STRSIZE-1);
-			strncat(filename, "/brightness", STRSIZE-1);
+			filename = malloc(30 + strnlen_s(ent->d_name, sizeof(ent->d_name)));
+			strcpy_s(filename, STRSIZE-1, "/sys/class/leds/");
+			strcat_s(filename, STRSIZE-1, ent->d_name);
+			strcat_s(filename, STRSIZE-1, "/brightness");
 			char *value = read_fs(filename);
 			free(filename);
 			mvprintw(row, 0, "%s", ent->d_name);
@@ -277,7 +278,7 @@ void print_ip() {
 	}
 	else {
 		ifr.ifr_addr.sa_family = AF_INET;
-		strncpy(ifr.ifr_name, "eth0", IFNAMSIZ-1);
+		strcpy_s(ifr.ifr_name, IFNAMSIZ-1, "eth0");
 		ioctl(fd, SIOCGIFADDR, &ifr);
 		close(fd);
 		mvprintw(row, 0, "IPv4 Address");
@@ -290,7 +291,7 @@ void print_ip() {
 void print_header() {
 	const char *header = "ALTERA SYSTEM CHECK";
 
-	mvprintw(0, maxcol/2-strlen(header)/2, "%s", header);
+	mvprintw(0, maxcol/2-strnlen_s(header, sizeof(header))/2, "%s", header);
 }
 
 int main(int argc, char *argv[])

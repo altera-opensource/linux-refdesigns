@@ -1,19 +1,19 @@
-C_SRC := syschk.c
-CFLAGS := -Werror -Wall
+C_SRC := syschk.c strnlen_s.c safe_str_constraint.c ignore_handler_s.c strcat_s.c strcpy_s.c
+CFLAGS := -g -Werror -Wall -I../safeclib_h -I../safeclib
 
 RM := rm -rf
 
-ELF := syschk
+ELF ?= $(basename $(firstword $(C_SRC)))
 OBJ := $(patsubst %.c,%.o,$(C_SRC))
 
 .PHONY: all
-all: $(ELF) $(OBJ)
+all: $(ELF)
 
 .PHONY:
 clean:
-	$(RM) $(ELF) *.o
+	$(RM) $(ELF) $(OBJ)
 
-$(OBJ): $(C_SRC)
+$(OBJ): %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(ELF): $(OBJ)
