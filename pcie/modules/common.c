@@ -148,7 +148,6 @@ static int block_ioctl(struct block_device *bdev, fmode_t mode,
 {
 	struct dma_device *dmadev = bdev->bd_disk->private_data;
 	u32 timediff;
-	//u32 transtbl;
 
 	switch (cmd) {
 	case GET_SIZE_IOCTL:
@@ -166,11 +165,6 @@ static int block_ioctl(struct block_device *bdev, fmode_t mode,
 	case OCM_RX_IOCTL:
 	case SYS_TX_IOCTL:
 	case SYS_RX_IOCTL:
-
-		//transtbl = csr_readl(dmadev->epcra, A2P_ADDR_MAP_LO0);
-		//printk("Translation table 0x%x\n",transtbl);
-		//printk("CMD 0x%x SRC 0x%x DEST 0x%x LEN %d\n",cmd, dmadev->osrc,
-		//		   dmadev->odest, dmadev->datlen);
 
 		memset(dmadev->vdest, 0, dmadev->datlen);
 		timediff = msgdma_transfer(dmadev, dmadev->osrc,
