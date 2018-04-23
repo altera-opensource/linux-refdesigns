@@ -25,6 +25,7 @@
 #include <linux/gpio.h>
 
 static int gpio_number = -1;
+static int intr_type = -1;
 
 irqreturn_t gpio_isr(int this_irq, void *dev_id)
 {
@@ -49,6 +50,13 @@ static int __init gpio_interrupt_init(void)
 		pr_err("Please specify a valid gpio_number\n");
 		return -1;
 	}
+
+	if (intr_type < 0) {
+		pr_err("Please specify a valid intr_type. Button gpio: intr_type=2, "
+			"Dipsw gpio: intr_type=3\n");
+		return -1;
+	}
+
 	req = gpio_request(gpio_number, "pio interrupt");
 
 	if (req != 0) {
@@ -58,7 +66,7 @@ static int __init gpio_interrupt_init(void)
 
 	irq_number = gpio_to_irq(gpio_number);
 
-	r = request_irq(irq_number, gpio_isr, IRQF_TRIGGER_FALLING, 0, 0);
+	r = request_irq(irq_number, gpio_isr, intr_type, 0, 0);
 	if (r) {
 		pr_err("Failure requesting irq %i\n", irq_number);
 		return r;
@@ -69,6 +77,7 @@ static int __init gpio_interrupt_init(void)
 MODULE_LICENSE("GPL");
 
 module_param(gpio_number, int, 0);
+module_param(intr_type, int, 0);
 
 module_init(gpio_interrupt_init);
 module_exit(gpio_interrupt_exit);
