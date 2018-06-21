@@ -51,7 +51,7 @@
  *
  *    All elements following the terminating null character (if
  *    any) written by strcat_s in the array of dmax characters
- *    pointed to by dest take unspeciﬁed values when strcat_s
+ *    pointed to by dest take unspecified values when strcat_s
  *    returns.
  *
  * SPECIFIED IN
@@ -229,4 +229,4 @@ strcat_s (char *dest, rsize_t dmax, const char *src)
 
     return RCNEGATE(ESNOSPC);
 }
-EXPORT_SYMBOL(strcat_s);
+EXPORT_SYMBOL(strcat_s)

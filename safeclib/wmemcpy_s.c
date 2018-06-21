@@ -73,8 +73,8 @@
  *    smax shall not be greater than dmax.
  *    Copying shall not take place between regions that overlap.
  *    If there is a runtime-constraint violation, the memcpy_s function
- *        stores zeros in the ﬁrst dmax bytes of the region pointed to
- *        by dest if dest is not a null pointer and smax is valid.
+ *    stores zeros in the first dmax bytes of the region pointed to
+ *    by dest if dest is not a null pointer and smax is valid.
  *
  * RETURN VALUE
  *    EOK        successful operation
@@ -155,4 +155,4 @@ wmemcpy_s(wchar_t* dest, rsize_t dmax, const wchar_t* src, rsize_t smax)
 
     return RCNEGATE(EOK);
 }
-EXPORT_SYMBOL(wmemcpy_s);
+EXPORT_SYMBOL(wmemcpy_s)

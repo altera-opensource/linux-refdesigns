@@ -73,8 +73,8 @@
  *    smax shall not be greater than dmax.
  *    Copying shall not take place between objects that overlap.
  *    If there is a runtime-constraint violation, the memcpy_s function stores
- *      zeros in the ﬁrst dmax bytes of the object pointed to by dest
- *      if dest is not a null pointer and smax is valid.
+ *    zeros in the first dmax bytes of the object pointed to by dest
+ *    if dest is not a null pointer and smax is valid.
  *
  * RETURN VALUE
  *    EOK       operation sucessful
@@ -147,4 +147,4 @@ memcpy32_s (uint32_t *dest, rsize_t dmax, const uint32_t *src, rsize_t smax)
 
     return (RCNEGATE(EOK));
 }
-EXPORT_SYMBOL(memcpy32_s);
+EXPORT_SYMBOL(memcpy32_s)
