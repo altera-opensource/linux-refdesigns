@@ -71,6 +71,8 @@ static int __init gpio_interrupt_init(void)
 		pr_err("Failure requesting irq %i\n", irq_number);
 		return r;
 	}
+
+	pr_info("Interrupt for GPIO:%d\n registered", gpio_number);	
 	return 0;
 }
 
