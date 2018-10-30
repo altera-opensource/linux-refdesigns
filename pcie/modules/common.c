@@ -188,7 +188,7 @@ static void blk_request(struct request_queue *rq)
 	req = blk_fetch_request(rq);
 
 	while (req) {
-		if (req->cmd_type != REQ_TYPE_FS)
+		if (req->cmd_flags & RQF_FLUSH_SEQ)
 			continue;
 
 		dmadev = req->rq_disk->private_data;
