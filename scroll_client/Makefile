@@ -1,5 +1,5 @@
 C_SRC := scroll_client.c
-CFLAGS := -Werror -Wall
+CFLAGS := -Werror -Wall -D_FORTIFY_SOURCE=2 -fstack-protector-all
 
 ifeq ($(or $(COMSPEC),$(ComSpec)),)
 RM := rm -rf

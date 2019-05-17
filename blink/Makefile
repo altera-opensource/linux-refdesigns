@@ -1,5 +1,5 @@
 C_SRC := blink.c
-CFLAGS := -Werror -Wall -I../led_control
+CFLAGS := -Werror -Wall -D_FORTIFY_SOURCE=2 -fstack-protector-all -I../led_control
 
 ifeq ($(or $(COMSPEC),$(ComSpec)),)
 RM := rm -rf
