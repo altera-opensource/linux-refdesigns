@@ -1,5 +1,5 @@
 C_SRC := syschk.c strnlen_s.c safe_str_constraint.c ignore_handler_s.c strcat_s.c strcpy_s.c
-CFLAGS := -g -Werror -Wall -D_FORTIFY_SOURCE=2 -fstack-protector-all -I../include -I../safeclib
+CFLAGS := -g -Werror -Wall -fstack-protector-all -I../include -I../safeclib
 
 RM := rm -rf
 
