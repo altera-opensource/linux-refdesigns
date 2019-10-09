@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, Altera Corporation <www.altera.com>
+ * Copyright (c) 2013-2014, Altera Corporation <www.intelFPGA.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "../include/snprintf_s.h"
 #include "led_control.h"
+
+#define STRSIZE 256
+
 
 int scroll_interval = 500;
 int clear = 1;
@@ -46,12 +50,16 @@ void* check_scroll_frequency_thread(void*foo)
 
 	while (1) {
 		int scroll_interval_tmp;
-		fp = fopen("/home/root/.altera/frequency_fifo_scroll", "r");
+		fp = fopen("/home/root/.intelFPGA/frequency_fifo_scroll", "r");
 		if (fp == NULL) {
 			printf("Failed opening fifo frequency_fifo_scroll\n");
 			return NULL;
 		}
-		fgets(readbuf, 10, fp);
+		if (fgets(readbuf, 10, fp) == NULL)
+		{
+			printf("Failed opening fifo read\n");
+			return NULL;
+		}
 		scroll_interval_tmp = atoi(readbuf);
 		fclose(fp);
 
@@ -66,8 +74,8 @@ void* check_scroll_frequency_thread(void*foo)
 		if (scroll_interval_tmp == 0) {
 			FILE *fp;
 			char write_scroll[10];
-			sprintf(write_scroll, "%d", scroll_interval);
-			fp = fopen("/home/root/.altera/get_scroll_fifo", "w");
+			snprintf_s_i(write_scroll, STRSIZE-1,"%d", scroll_interval);
+			fp = fopen("/home/root/.intelFPGA/get_scroll_fifo", "w");
 			if (fp == NULL) {
 				printf("Failed opening fifo get_scroll_fifo\n");
 				return NULL;
@@ -108,9 +116,9 @@ int main(int argc, char** argv)
 	printf("Starting blinking LED server\n");
 
 	umask(0);
-	mkdir("/home/root/.altera", 0777);
-	mknod("/home/root/.altera/frequency_fifo_scroll", S_IFIFO|0666, 0);
-	mknod("/home/root/.altera/get_scroll_fifo", S_IFIFO|0666, 0);
+	mkdir("/home/root/.intelFPGA", 0777);
+	mknod("/home/root/.intelFPGA/frequency_fifo_scroll", S_IFIFO|0666, 0);
+	mknod("/home/root/.intelFPGA/get_scroll_fifo", S_IFIFO|0666, 0);
 
 	pthread_t tid;
 	pthread_create(&tid, NULL, check_scroll_frequency_thread, NULL);
@@ -123,13 +131,13 @@ int main(int argc, char** argv)
 		char scroll_char[10];
 		/* Set the LED to not blinking */
 		clear_leds();
-		sprintf(scroll_char, "%d", scroll);
+		snprintf_s_i(scroll_char, STRSIZE-1,"%d", scroll);
 		setLEDBrightness(scroll, 0);
 
 		if (isScrollingUp)
-			sprintf(scroll_char, "%d", ++scroll);
+			snprintf_s_i(scroll_char, STRSIZE-1,"%d", ++scroll);
 		else
-			sprintf(scroll_char, "%d", --scroll);
+			snprintf_s_i(scroll_char, STRSIZE-1,"%d", --scroll);
 
 		if (scroll <= scroll_btm) isScrollingUp = 1;
 		if (scroll >= scroll_top) isScrollingUp = 0;

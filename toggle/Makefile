@@ -1,5 +1,5 @@
 C_SRC := toggle.c
-CFLAGS := -Werror -Wall -fstack-protector-all -I../led_control
+CFLAGS := -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -Werror=format-security -Werror -Wall -fstack-protector-all -O -I../led_control
 
 ifeq ($(or $(COMSPEC),$(ComSpec)),)
 RM := rm -rf

@@ -1,5 +1,5 @@
 C_SRC := dmaxfer.c
-CFLAGS := -Werror -Wall -I ../modules
+CFLAGS := -Werror -Wall -fstack-protector-all -O-I ../modules
 
 RM := rm -rf
 

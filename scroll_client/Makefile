@@ -1,5 +1,5 @@
 C_SRC := scroll_client.c
-CFLAGS := -Werror -Wall -fstack-protector-all
+CFLAGS := -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -Werror=format-security -Werror -Wall -fstack-protector-all -O -I../include -I../safeclib
 
 ifeq ($(or $(COMSPEC),$(ComSpec)),)
 RM := rm -rf
@@ -17,7 +17,7 @@ all: $(ELF) $(OBJ)
 clean:
 	$(RM) $(ELF) *.o
 
-$(OBJ): $(C_SRC)
+$(OBJ): %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(ELF): $(OBJ)

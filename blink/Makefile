@@ -1,5 +1,5 @@
-C_SRC := blink.c
-CFLAGS := -Werror -Wall -fstack-protector-all -I../led_control
+C_SRC := blink.c snprintf_support.c safe_str_constraint.c ignore_handler_s.c
+CFLAGS := -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -Werror=format-security -Werror -Wall -fstack-protector-all -O -I../led_control -I../include -I../safeclib
 
 ifeq ($(or $(COMSPEC),$(ComSpec)),)
 RM := rm -rf
@@ -17,7 +17,7 @@ all: $(ELF) $(OBJ)
 clean:
 	$(RM) $(ELF) *.o
 
-$(OBJ): $(C_SRC)
+$(OBJ): %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(ELF): $(OBJ)

@@ -21,8 +21,8 @@
 #include <linux/platform_device.h>
 
 #include "common.h"
-#include "altera_rpdma.h"
-#include "altera_epdma.h"
+#include .intelFPGA_rpdma.h"
+#include .intelFPGA_epdma.h"
 
 #define MSGDMA_SW_RESET_COUNT		10000
 #define MSGDMA_POLL_TIMEOUT		50000

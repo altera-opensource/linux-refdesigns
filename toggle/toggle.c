@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, Altera Corporation <www.altera.com>
+ * Copyright (c) 2013-2014, Altera Corporation <www.intelFPGA.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,19 +70,25 @@ int main(int argc, char** argv)
 	 * if it is, we will inform user, and bail
 	 */
 	sprintf(get_fifo_scroll, "%d", 0);
-	fp = fopen("/home/root/.altera/frequency_fifo_scroll", "w");
+	fp = fopen("/home/root/.intelFPGA/frequency_fifo_scroll", "w");
 	if (fp == NULL) {
 		printf("Failed opening fifo frequency_fifo_scroll\n");
 		return -1;
 	}
 	fputs(get_fifo_scroll, fp);
 	fclose(fp);
-	fp = fopen("/home/root/.altera/get_scroll_fifo", "r");
+	fp = fopen("/home/root/.intelFPGA/get_scroll_fifo", "r");
 	if (fp == NULL) {
 		printf("Failed opening fifo get_scroll_fifo\n");
 		return -1;
 	}
-	fgets(seconds_bet_toggle, 10, fp);
+	
+	if (fgets(seconds_bet_toggle, 10, fp) == NULL)
+	{
+		printf("Failed opening toggle\n");
+                return -1;
+	}
+	
 	fclose(fp);
 	if (atoi(seconds_bet_toggle) > 0) {
 		printf("LED is scrolling.\n");

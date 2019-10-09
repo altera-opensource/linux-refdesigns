@@ -1,5 +1,5 @@
 C_SRC := led_control.c
-CFLAGS := -Werror -Wall -fstack-protector-all -I../led_control
+CFLAGS := -Werror -Wall -fstack-protector-all -O -I../led_control
 
 ifeq ($(or $(COMSPEC),$(ComSpec)),)
 RM := rm -rf

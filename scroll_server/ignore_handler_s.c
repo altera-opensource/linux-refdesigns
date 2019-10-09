@@ -1,9 +1,9 @@
 /*------------------------------------------------------------------
- * sprintf_s.h -- Safe Sprintf Interfaces
+ * ignore_handler_s.c
  *
- * August 2014, D Wheeler
+ * 2012, Jonathan Toppins <jtoppins@users.sourceforge.net>
  *
- * Copyright (c) 2014 by Intel Corp
+ * Copyright (c) 2012 Cisco Systems
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -28,21 +28,45 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  *------------------------------------------------------------------
  */
-#ifndef SPRINTF_S_H_
-#define SPRINTF_S_H_
 
-#include <safe_lib_errno.h>
+#include "safeclib_private.h"
 
+/**
+ * NAME
+ *    ignore_handler_s
+ *
+ * SYNOPSIS
+ *    #include "safe_lib.h"
+ *    void ignore_handler_s(const char *msg, void *ptr, errno_t error)
+ *
+ * DESCRIPTION
+ *    This function simply returns to the caller.
+ *
+ * SPECIFIED IN
+ *    ISO/IEC JTC1 SC22 WG14 N1172, Programming languages, environments
+ *    and system software interfaces, Extensions to the C Library,
+ *    Part I: Bounds-checking interfaces
+ *
+ * INPUT PARAMETERS
+ *    msg       Pointer to the message describing the error
+ *
+ *    ptr       Pointer to aassociated data.  Can be NULL.
+ *
+ *    error     The error code encountered.
+ *
+ * RETURN VALUE
+ *    Returns no value.
+ *
+ * ALSO SEE
+ *    abort_handler_s()
+ *
+ */
 
-#define SNPRFNEGATE(x) (-1*(x))
+void ignore_handler_s(const char *msg, void *ptr, errno_t error)
+{
 
-
-
-int snprintf_s_i(char *dest, size_t dmax, const char *format, int a);
-int snprintf_s_si(char *dest, size_t dmax, const char *format, char *s, int a);
-int snprintf_s_l(char *dest, size_t dmax, const char *format, long a);
-int snprintf_s_sl(char *dest, size_t dmax, const char *format, char *s, long a);
-
-
-
-#endif /* SPRINTF_S_H_ */
+	sldebug_printf("IGNORE CONSTRAINT HANDLER: (%u) %s\n", error,
+		       (msg) ? msg : "Null message");
+	return;
+}
+EXPORT_SYMBOL(ignore_handler_s)

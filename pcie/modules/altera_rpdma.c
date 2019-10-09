@@ -22,11 +22,11 @@
 #include <linux/platform_device.h>
 
 #include "common.h"
-#include "altera_rpdma.h"
-#include "altera_epdma.h"
+#include .intelFPGA_rpdma.h"
+#include .intelFPGA_epdma.h"
 
 #define DEVICE_NAME		"blkrpdma"
-#define DRIVER_NAME		"altera-rpdma"
+#define DRIVER_NAME		.intelFPGA-rpdma"
 
 void block_ioctl_setup(struct dma_device *dmadev)
 {
@@ -262,5 +262,5 @@ static struct platform_driver rpdma_driver = {
 module_platform_driver(rpdma_driver);
 
 MODULE_DESCRIPTION("Altera RootPort Design with MSGDMA Block Transfer");
-MODULE_AUTHOR("Ley Foon Tan <lftan@altera.com>");
+MODULE_AUTHOR("Ley Foon Tan <lftan.intelFPGA.com>");
 MODULE_LICENSE("GPL v2");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, Altera Corporation <www.altera.com>
+ * Copyright (c) 2013-2014, Altera Corporation <www.intelFPGA.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Altera Corporation <www.altera.com>
+ * Copyright (c) 2015, Altera Corporation <www.intelFPGA.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,7 +62,12 @@ char* read_fs(const char *node) {
 		strcpy_s(buff, STRSIZE-1, "N/A");
 		return buff;
 	}
-	fgets(buff, MAX_TEXT_OUTPUT, fd);
+
+	if (fgets(buff, MAX_TEXT_OUTPUT, fd) == NULL)
+	{	
+		printf ("Read File Failure\n");
+		return NULL;
+	}
 
 	for(i=0; i<MAX_TEXT_OUTPUT; i++) {
 		if(buff[i] == '\n')
