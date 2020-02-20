@@ -32,7 +32,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "../include/snprintf_s.h"
 #include "led_control.h"
 
 #define STRSIZE 256
@@ -76,7 +75,7 @@ int main(int argc, char** argv)
 	   if it is, we will inform user, and bail
 	*/
 	char get_fifo_scroll[2], seconds_bet_toggle[10];
-	snprintf_s_i(get_fifo_scroll, STRSIZE-1, "0", 0);
+	sprintf(get_fifo_scroll, "%d", 0);
 	fp = fopen("/home/root/.intelFPGA/frequency_fifo_scroll", "w");
 	if (fp == NULL) {
 		printf("Failed opening fifo frequency_fifo_scroll\n");
@@ -110,12 +109,12 @@ int main(int argc, char** argv)
 	/* Setting the trigger to blinking */
 	setLEDtrigger(led, trigger, sizeof(trigger));
 	/* Setting the delay */
-	snprintf_s_i(dir, STRSIZE-1, "/sys/class/leds/fpga_led%d/delay_on", led);
+	sprintf(dir, "/sys/class/leds/fpga_led%d/delay_on", led);
 	if ((fp = fopen(dir, "w")) == NULL) {
 		printf("Failed to open the file %s\n" , dir);
 	}
 	else {
-		snprintf_s_i(delay, STRSIZE-1,"%d", blink_interval_ms);
+		sprintf(delay, "%d", blink_interval_ms);
 		if (fwrite(delay, 1, sizeof(delay), fp) == 0)
 		{
 			fclose(fp);
@@ -123,12 +122,12 @@ int main(int argc, char** argv)
 		}
 		fclose(fp);
 	}
-	snprintf_s_i(dir, STRSIZE-1,"/sys/class/leds/fpga_led%d/delay_off", led);
+	sprintf(dir, "/sys/class/leds/fpga_led%d/delay_off", led);
 	if ((fp = fopen(dir, "w")) == NULL) {
 		printf("Failed to open the file %s\n" , dir);
 	}
 	else {
-		snprintf_s_i(delay, STRSIZE-1,"%d", blink_interval_ms);
+		sprintf(delay, "%d", blink_interval_ms);
                 if (fwrite(delay, 1, sizeof(delay), fp) == 0)
                 {
                         fclose(fp);
