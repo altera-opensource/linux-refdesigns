@@ -1,4 +1,5 @@
 This is the repository for the source code necessary to run reference designs.
 
-Each reference design is on its own branch
+Each reference design is on its own branch.
 
+This repository includes software from several sources under a collection of compatible open source licenses; refer to the specific copyright/license embedded in each source file.
