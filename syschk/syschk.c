@@ -63,9 +63,19 @@ char* read_fs(const char *node) {
 		return buff;
 	}
 
-	if (fgets(buff, MAX_TEXT_OUTPUT, fd) == NULL)
-	{	
-		printf ("Read File Failure\n");
+	if (buff != NULL) {
+		if (fgets(buff, MAX_TEXT_OUTPUT, fd) == NULL)
+		{
+			printf ("Read File Failure\n");
+			free(buff);
+			fclose(fd);
+			return NULL;
+		}
+	}
+	else {
+		printf ("Failed to allocate memory\n");
+		free(buff);
+		fclose(fd);
 		return NULL;
 	}
 
@@ -74,7 +84,6 @@ char* read_fs(const char *node) {
 			buff[i] = '\0';
 	}
 	buff[254] = 0;
-
 
 	fclose(fd);
 
@@ -86,15 +95,22 @@ char* get_i2c_hwmon(char *i2c_address, char *pmbusname, char *type) {
 	label = strtok(pmbusname, "_");
 	filename = malloc((30 +
 		strnlen_s(i2c_address, sizeof(i2c_address)))*sizeof(char) + strnlen_s(label, sizeof(label)));
-	strcpy_s(filename, STRSIZE-1, "/sys/bus/i2c/devices/");
-	strcat_s(filename, STRSIZE-1, i2c_address);
-	strcat_s(filename, STRSIZE-1, "/");
-	strcat_s(filename, STRSIZE-1, label);
-	strcat_s(filename, STRSIZE-1, type);
-	print = read_fs(filename);
-	free(filename);
 
-	return print;
+	if (filename != NULL) {
+		strcpy_s(filename, STRSIZE-1, "/sys/bus/i2c/devices/");
+		strcat_s(filename, STRSIZE-1, i2c_address);
+		strcat_s(filename, STRSIZE-1, "/");
+		strcat_s(filename, STRSIZE-1, label);
+		strcat_s(filename, STRSIZE-1, type);
+		print = read_fs(filename);
+		free(filename);
+		return print;
+	}
+	else {
+		printf ("Failed to allocate memory\n");
+		free(filename);
+		return NULL;
+	}
 }
 
 /* Coverity Fix Defect Id 125056 */
@@ -132,17 +148,32 @@ void print_all_hwmon() {
 					strcmp(ent->d_name, "..") == 0)
 				continue;
 			filename = malloc(27 + strnlen_s(ent->d_name, sizeof(ent->d_name)));
-			strcpy_s(filename, STRSIZE-1, "/sys/bus/i2c/devices/");
-			strcat_s(filename, STRSIZE-1, ent->d_name);
-			strcat_s(filename, STRSIZE-1, "/name");
-			char *value = read_fs(filename);
-			if (strcmp(value, "pmbus") == 0) {
+
+			if (filename != NULL) {
 				strcpy_s(filename, STRSIZE-1, "/sys/bus/i2c/devices/");
 				strcat_s(filename, STRSIZE-1, ent->d_name);
-				print_hwmon(filename, ent->d_name);
+				strcat_s(filename, STRSIZE-1, "/name");
+				char *value = read_fs(filename);
+				if (value != NULL) {
+					if (strcmp(value, "pmbus") == 0) {
+						strcpy_s(filename, STRSIZE-1, "/sys/bus/i2c/devices/");
+						strcat_s(filename, STRSIZE-1, ent->d_name);
+						print_hwmon(filename, ent->d_name);
+					}
+					free(filename);
+					free(value);
+				}
+				else {
+					printf ("Failed to allocate memory\n");
+					free(value);
+					return;
+				}
 			}
-			free(filename);
-			free(value);
+			else {
+				printf ("Failed to allocate memory\n");
+				free(filename);
+				return;
+			}
 		}
 		closedir(dir);
 	}
@@ -170,15 +201,22 @@ void print_usb() {
 					strstr(ent->d_name, "usb") == 0)
 				continue;
 			filename = malloc(30 + strnlen_s(ent->d_name, sizeof(ent->d_name)));
-			strcpy_s(filename, STRSIZE-1, "/sys/bus/usb/devices/");
-			strcat_s(filename, STRSIZE-1, ent->d_name);
-			strcat_s(filename, STRSIZE-1, "/product");
-			value = read_fs(filename);
-			trim_overflow_characters(value);
-			mvprintw(row2, maxcol/2, "%s", ent->d_name);
-			mvprintw(row2++, maxcol/2+INDENT, ": %s", value);
-			free(filename);
-			free(value);
+
+			if (filename != NULL) {
+				strcpy_s(filename, STRSIZE-1, "/sys/bus/usb/devices/");
+				strcat_s(filename, STRSIZE-1, ent->d_name);
+				strcat_s(filename, STRSIZE-1, "/product");
+				value = read_fs(filename);
+				trim_overflow_characters(value);
+				mvprintw(row2, maxcol/2, "%s", ent->d_name);
+				mvprintw(row2++, maxcol/2+INDENT, ": %s", value);
+				free(filename);
+				free(value);
+			}
+			else {
+				printf ("Failed to allocate memory\n");
+				free(filename);
+			}
 		}
 		row2++;
 		closedir(dir);
@@ -197,14 +235,21 @@ void print_sysid() {
 					strstr(ent->d_name, "sysid") == 0)
 				continue;
 			filename = malloc(38 + strnlen_s(ent->d_name, sizeof(ent->d_name)));
-			strcpy_s(filename, STRSIZE-1, "/sys/bus/platform/devices/");
-			strcat_s(filename, STRSIZE-1, ent->d_name);
-			strcat_s(filename, STRSIZE-1, "/sysid/id");
-			value = read_fs(filename);
-			mvprintw(row2, maxcol/2, "%s", ent->d_name);
-			mvprintw(row2++, maxcol/2+INDENT, ": %s", value);
-			free(filename);
-			free(value);
+
+			if (filename != NULL) {
+				strcpy_s(filename, STRSIZE-1, "/sys/bus/platform/devices/");
+				strcat_s(filename, STRSIZE-1, ent->d_name);
+				strcat_s(filename, STRSIZE-1, "/sysid/id");
+				value = read_fs(filename);
+				mvprintw(row2, maxcol/2, "%s", ent->d_name);
+				mvprintw(row2++, maxcol/2+INDENT, ": %s", value);
+				free(filename);
+				free(value);
+			}
+			else {
+				printf ("Failed to allocate memory\n");
+				free(filename);
+			}
 		}
 		row2 += 2;
 		closedir(dir);
@@ -223,14 +268,21 @@ void print_uart() {
 					strstr(ent->d_name, "serial") == 0)
 				continue;
 			filename = malloc(32 + strnlen_s(ent->d_name, sizeof(ent->d_name)));
-			strcpy_s(filename, STRSIZE-1, "/proc/device-tree/soc/");
-			strcat_s(filename, STRSIZE-1, ent->d_name);
-			strcat_s(filename, STRSIZE-1, "/status");
-			value = read_fs(filename);
-			mvprintw(row2, maxcol/2, "%s", ent->d_name);
-			mvprintw(row2++, maxcol/2+INDENT, ": %s", value);
-			free(filename);
-			free(value);
+
+			if (filename != NULL) {
+				strcpy_s(filename, STRSIZE-1, "/proc/device-tree/soc/");
+				strcat_s(filename, STRSIZE-1, ent->d_name);
+				strcat_s(filename, STRSIZE-1, "/status");
+				value = read_fs(filename);
+				mvprintw(row2, maxcol/2, "%s", ent->d_name);
+				mvprintw(row2++, maxcol/2+INDENT, ": %s", value);
+				free(filename);
+				free(value);
+			}
+			else {
+				printf ("Failed to allocate memory\n");
+				free(filename);
+			}
 		}
 		row2++;
 		closedir(dir);
@@ -257,17 +309,30 @@ void print_leds() {
 					strcmp(ent->d_name, "..") == 0)
 				continue;
 			filename = malloc(30 + strnlen_s(ent->d_name, sizeof(ent->d_name)));
-			strcpy_s(filename, STRSIZE-1, "/sys/class/leds/");
-			strcat_s(filename, STRSIZE-1, ent->d_name);
-			strcat_s(filename, STRSIZE-1, "/brightness");
-			char *value = read_fs(filename);
-			free(filename);
-			mvprintw(row, 0, "%s", ent->d_name);
-			if(strcmp(value, "1") == 0)
-				mvprintw(row++, INDENT, ": ON");
-			else
-				mvprintw(row++, INDENT, ": OFF");
-			free(value);
+
+			if (filename != NULL) {
+				strcpy_s(filename, STRSIZE-1, "/sys/class/leds/");
+				strcat_s(filename, STRSIZE-1, ent->d_name);
+				strcat_s(filename, STRSIZE-1, "/brightness");
+				char *value = read_fs(filename);
+				free(filename);
+				mvprintw(row, 0, "%s", ent->d_name);
+				if (value != NULL) {
+					if(strcmp(value, "1") == 0)
+						mvprintw(row++, INDENT, ": ON");
+					else
+						mvprintw(row++, INDENT, ": OFF");
+					free(value);
+				}
+				else {
+					printf ("Failed to allocate memory\n");
+					free(value);
+				}
+			}
+			else {
+				printf ("Failed to allocate memory\n");
+				free(filename);
+			}
 		}
 		closedir(dir);
 	}
