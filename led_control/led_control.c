@@ -32,12 +32,14 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#define STRSIZE 256
+
 void setLEDtrigger(int ledno, char* trigger, int size)
 {
 	FILE *fp;
-	char dir[100];
+	char dir[STRSIZE];
 
-	sprintf(dir, "/sys/class/leds/fpga_led%d/trigger", ledno);
+	snprintf(dir, STRSIZE-1, "/sys/class/leds/fpga_led%d/trigger", ledno);
 
 	if ((fp = fopen(dir, "w")) == NULL) {
 		printf("Failed to open the file %s\n", dir);
@@ -51,11 +53,11 @@ void setLEDtrigger(int ledno, char* trigger, int size)
 void setLEDBrightness(int ledno, int brightness)
 {
 	FILE *fp;
-	char dir[100];
-	char brightness_char[10];
+	char dir[STRSIZE];
+	char brightness_char[STRSIZE];
 
-	sprintf(dir, "/sys/class/leds/fpga_led%d/brightness", ledno);
-	sprintf(brightness_char, "%d", brightness);
+	snprintf(dir, STRSIZE-1, "/sys/class/leds/fpga_led%d/brightness", ledno);
+	snprintf(brightness_char, STRSIZE-1, "%d", brightness);
 
 	if ((fp = fopen(dir, "w")) == NULL) {
 		printf("Failed to open the file %s\n", dir);
