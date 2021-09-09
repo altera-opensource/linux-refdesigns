@@ -34,9 +34,14 @@
 
 #include <linux/stat.h>
 
+pthread_rwlock_t rdlock = PTHREAD_RWLOCK_INITIALIZER;
+pthread_rwlock_t wrlock = PTHREAD_RWLOCK_INITIALIZER;
+
 int main(int argc, char** argv)
 {
 	char ms_bet_toggle[100];
+	pthread_rwlock_init(&rdlock, NULL);
+	pthread_rwlock_init(&wrlock, NULL);
 
 	if (argc != 2) {
 		printf("Usage: %s <ms between LED toggle>\n", argv[0]);
@@ -53,7 +58,17 @@ int main(int argc, char** argv)
 	}
 	else {
 		FILE *fp;
-		fp = fopen("/home/root/.intelFPGA/frequency_fifo_scroll", "w");
+		if (pthread_rwlock_wrlock(&wrlock) != 0 ) {
+			printf("wrlock lock failed");
+			return -1;
+		}
+		else {
+			fp = fopen("/home/root/.intelFPGA/frequency_fifo_scroll", "w");
+			if (pthread_rwlock_unlock(&wrlock) && pthread_rwlock_destroy(&wrlock) != 0) {
+				printf("wrlock exit failed");
+				return -1;
+			}
+		}
 		if (fp == NULL) {
 			printf("Failed opening fifo frequency_fifo_scroll\n");
 			return -1;
@@ -61,7 +76,17 @@ int main(int argc, char** argv)
 		fputs(ms_bet_toggle, fp);
 		fclose(fp);
 		if(atoi(ms_bet_toggle) == 0) {
-			fp = fopen("/home/root/.intelFPGA/get_scroll_fifo", "r");
+			if (pthread_rwlock_rdlock(&rdlock) != 0 ) {
+				printf("rdlock lock failed");
+				return -1;
+			}
+			else {
+				fp = fopen("/home/root/.intelFPGA/get_scroll_fifo", "r");
+				if (pthread_rwlock_unlock(&rdlock) && pthread_rwlock_destroy(&rdlock) != 0) {
+					printf("rdlock exit failed");
+					return -1;
+				}
+			}
 			if (fp == NULL) {
 				printf("Failed opening fifo get_scroll_fifo\n");
 				return -1;
