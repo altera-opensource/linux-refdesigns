@@ -140,7 +140,7 @@ void print_hwmon(char *device, char *i2c_address) {
 void print_all_hwmon() {
 	DIR *dir;
 	struct dirent *ent;
-	char *filename;
+	char *filename, *value;
 
 	if ((dir = opendir("/sys/bus/i2c/devices")) != NULL) {
 		while ((ent = readdir (dir)) != NULL) {
@@ -148,12 +148,13 @@ void print_all_hwmon() {
 					strcmp(ent->d_name, "..") == 0)
 				continue;
 			filename = malloc(27 + strnlen_s(ent->d_name, sizeof(ent->d_name)));
+			value = malloc(27 + strnlen_s(ent->d_name, sizeof(ent->d_name)));
 
-			if (filename != NULL) {
+			if (filename != NULL && value != NULL) {
 				strcpy_s(filename, STRSIZE-1, "/sys/bus/i2c/devices/");
 				strcat_s(filename, STRSIZE-1, ent->d_name);
 				strcat_s(filename, STRSIZE-1, "/name");
-				char *value = read_fs(filename);
+				strcpy_s(value, 5, read_fs(filename));
 				if (value != NULL) {
 					if (strcmp(value, "pmbus") == 0) {
 						strcpy_s(filename, STRSIZE-1, "/sys/bus/i2c/devices/");
@@ -165,6 +166,7 @@ void print_all_hwmon() {
 				}
 				else {
 					printf ("Failed to allocate memory\n");
+					free(filename);
 					free(value);
 					return;
 				}
@@ -172,6 +174,7 @@ void print_all_hwmon() {
 			else {
 				printf ("Failed to allocate memory\n");
 				free(filename);
+				free(value);
 				return;
 			}
 		}
@@ -302,23 +305,24 @@ int check_screen() {
 void print_leds() {
 	DIR *dir;
 	struct dirent *ent;
-	char *filename;
+	char *filename, *value;
 	if ((dir = opendir("/sys/class/leds")) != NULL) {
 		while ((ent = readdir (dir)) != NULL) {
 			if (strcmp(ent->d_name, ".") == 0 ||
 					strcmp(ent->d_name, "..") == 0)
 				continue;
 			filename = malloc(30 + strnlen_s(ent->d_name, sizeof(ent->d_name)));
+			value = malloc(30 + strnlen_s(ent->d_name, sizeof(ent->d_name)));
 
-			if (filename != NULL) {
+			if (filename != NULL && value != NULL) {
 				strcpy_s(filename, STRSIZE-1, "/sys/class/leds/");
 				strcat_s(filename, STRSIZE-1, ent->d_name);
 				strcat_s(filename, STRSIZE-1, "/brightness");
-				char *value = read_fs(filename);
+				strcpy_s(value, 1, read_fs(filename));
 				free(filename);
 				mvprintw(row, 0, "%s", ent->d_name);
 				if (value != NULL) {
-					if(strcmp(value, "1") == 0)
+					if(value[0] == '1')
 						mvprintw(row++, INDENT, ": ON");
 					else
 						mvprintw(row++, INDENT, ": OFF");
@@ -332,6 +336,7 @@ void print_leds() {
 			else {
 				printf ("Failed to allocate memory\n");
 				free(filename);
+				free(value);
 			}
 		}
 		closedir(dir);
