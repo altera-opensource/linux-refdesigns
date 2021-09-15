@@ -318,11 +318,11 @@ void print_leds() {
 				strcpy_s(filename, STRSIZE-1, "/sys/class/leds/");
 				strcat_s(filename, STRSIZE-1, ent->d_name);
 				strcat_s(filename, STRSIZE-1, "/brightness");
-				strcpy_s(value, 1, read_fs(filename));
+				strcpy_s(value, sizeof(value), read_fs(filename));
 				free(filename);
 				mvprintw(row, 0, "%s", ent->d_name);
 				if (value != NULL) {
-					if(value[0] == '1')
+					if(strcmp(value, "1") == 0)
 						mvprintw(row++, INDENT, ": ON");
 					else
 						mvprintw(row++, INDENT, ": OFF");
