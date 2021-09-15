@@ -70,6 +70,7 @@ int main(int argc, char** argv)
 			if (fgets(ms_bet_toggle, 10, fp) == NULL)
 			{
 				printf("Failed opening read\n");
+				fclose(fp);
 				return -1;
 			}
 			fclose(fp);
