@@ -83,7 +83,7 @@ char* read_fs(const char *node) {
 		if(buff[i] == '\n')
 			buff[i] = '\0';
 	}
-	buff[254] = 0;
+	//buff[254] = 0;
 
 	fclose(fd);
 
