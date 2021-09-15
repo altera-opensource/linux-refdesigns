@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	if (EOF == sscanf(argv[1], "%s", ms_bet_toggle)) {
+	if (EOF == sscanf(argv[1], "%99s", ms_bet_toggle)) {
 		printf("Failed reading <ms between LED toggle>\n.");
 		return -1;
 	}
