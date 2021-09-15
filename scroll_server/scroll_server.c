@@ -35,7 +35,7 @@
 #include "../include/snprintf_s.h"
 #include "led_control.h"
 
-#define STRSIZE 256
+#define STRSIZE 10
 
 
 int scroll_interval = 500;
