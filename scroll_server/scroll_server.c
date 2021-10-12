@@ -31,11 +31,12 @@
 #include <pthread.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include "../include/snprintf_s.h"
 #include "led_control.h"
 
-#define STRSIZE 10
+#define STRSIZE 256
 
 
 int scroll_interval = 500;
@@ -45,43 +46,64 @@ int led_btm = 0;
 
 void* check_scroll_frequency_thread(void*foo)
 {
-	FILE *fp;
-	char readbuf[100];
+	int fd;
+	int dirfd = 0;
+	char dir[STRSIZE];
+	char readbuf[STRSIZE];
 
 	while (1) {
 		int scroll_interval_tmp;
-		fp = fopen("/home/root/.intelFPGA/frequency_fifo_scroll", "r");
-		if (fp == NULL) {
+		snprintf(dir, STRSIZE, "/home/root/.intelFPGA/frequency_fifo_scroll");
+		fd = openat(dirfd, dir, O_RDONLY);
+		if (fd == -1) {
 			printf("Failed opening fifo frequency_fifo_scroll\n");
 			return NULL;
 		}
-		if (fgets(readbuf, 10, fp) == NULL)
+		if (read(fd, readbuf, STRSIZE) == -1)
 		{
 			printf("Failed opening fifo read\n");
 			return NULL;
 		}
 		scroll_interval_tmp = atoi(readbuf);
-		fclose(fp);
+		close(fd);
 
-		if (access("/sys/class/leds/fpga_led0/brightness", F_OK) != 0
-		|| access("/sys/class/leds/fpga_led1/brightness", F_OK) != 0
-		|| access("/sys/class/leds/fpga_led2/brightness", F_OK) != 0
-		|| access("/sys/class/leds/fpga_led3/brightness", F_OK) != 0) {
+		int dirfd0 = 0;
+		int dirfd1 = 0;
+		int dirfd2 = 0;
+		int dirfd3 = 0;
+		char dir0[STRSIZE];
+		char dir1[STRSIZE];
+		char dir2[STRSIZE];
+		char dir3[STRSIZE];
+		snprintf(dir0, STRSIZE, "/sys/class/leds/fpga_led0/brightness");
+		snprintf(dir1, STRSIZE, "/sys/class/leds/fpga_led1/brightness");
+		snprintf(dir2, STRSIZE, "/sys/class/leds/fpga_led2/brightness");
+		snprintf(dir3, STRSIZE, "/sys/class/leds/fpga_led3/brightness");
+		if (openat(dirfd0, dir0, O_RDWR) == -1
+		|| openat(dirfd1, dir1, O_RDWR) == -1
+		|| openat(dirfd2, dir2, O_RDWR) == -1
+		|| openat(dirfd3, dir3, O_RDWR) == -1) {
 			printf("Missing FPGA LEDs\n");
 		}
 
 		/* if interval is 0, client is doing a read */
 		if (scroll_interval_tmp == 0) {
-			FILE *fp;
-			char write_scroll[10];
+			int fd;
+			int dirfd = 0;
+			char dir[STRSIZE];
+			char write_scroll[STRSIZE];
 			snprintf_s_i(write_scroll, STRSIZE-1,"%d", scroll_interval);
-			fp = fopen("/home/root/.intelFPGA/get_scroll_fifo", "w");
-			if (fp == NULL) {
+			snprintf(dir, STRSIZE, "/home/root/.intelFPGA/get_scroll_fifo");
+			fd = openat(dirfd, dir, O_WRONLY);
+			if (fd == -1) {
 				printf("Failed opening fifo get_scroll_fifo\n");
 				return NULL;
 			}
-			fputs(write_scroll, fp);
-			fclose(fp);
+			if (write(fd, write_scroll, STRSIZE-1) == -1) {
+				printf("Failed opening fifo get_scroll_fifo\n");
+				return NULL;
+			}
+			close(fd);
 		}
 		else {
 			scroll_interval = scroll_interval_tmp;
@@ -128,7 +150,7 @@ int main(int argc, char** argv)
 	*/
 	while (1) {
 		/* Scrolling LED */
-		char scroll_char[10];
+		char scroll_char[STRSIZE];
 		/* Set the LED to not blinking */
 		clear_leds();
 		snprintf_s_i(scroll_char, STRSIZE-1,"%d", scroll);
