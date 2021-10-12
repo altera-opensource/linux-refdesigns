@@ -31,12 +31,15 @@
 #include <pthread.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include <linux/stat.h>
 
+#define STRSIZE 256
+
 int main(int argc, char** argv)
 {
-	char ms_bet_toggle[100];
+	char ms_bet_toggle[STRSIZE];
 
 	if (argc != 2) {
 		printf("Usage: %s <ms between LED toggle>\n", argv[0]);
@@ -52,28 +55,35 @@ int main(int argc, char** argv)
 		return -1;
 	}
 	else {
-		FILE *fp;
-		fp = fopen("/home/root/.intelFPGA/frequency_fifo_scroll", "w");
-		if (fp == NULL) {
+		int fd;
+		int dirfd = 0;
+		char dir[STRSIZE];
+		snprintf(dir, STRSIZE, "/home/root/.intelFPGA/frequency_fifo_scroll");
+		fd = openat(dirfd, dir, O_WRONLY);
+		if (fd == -1) {
 			printf("Failed opening fifo frequency_fifo_scroll\n");
 			return -1;
 		}
-		fputs(ms_bet_toggle, fp);
-		fclose(fp);
+		if (write(fd, ms_bet_toggle, STRSIZE-1) == -1) {
+			printf("Failed opening fifo frequency_fifo_scroll\n");
+			return -1;
+		}
+		close(fd);
 		if(atoi(ms_bet_toggle) == 0) {
-			fp = fopen("/home/root/.intelFPGA/get_scroll_fifo", "r");
-			if (fp == NULL) {
+			snprintf(dir, STRSIZE, "/home/root/.intelFPGA/get_scroll_fifo");
+			fd = openat(dirfd, dir, O_RDONLY);
+			if (fd == -1) {
 				printf("Failed opening fifo get_scroll_fifo\n");
 				return -1;
 			}
-			
-			if (fgets(ms_bet_toggle, 10, fp) == NULL)
+
+			if (read(fd, ms_bet_toggle, 10) == -1)
 			{
 				printf("Failed opening read\n");
-				fclose(fp);
+				close(fd);
 				return -1;
 			}
-			fclose(fp);
+			close(fd);
 			printf("%d", atoi(ms_bet_toggle));
 			return 0;
 		}
