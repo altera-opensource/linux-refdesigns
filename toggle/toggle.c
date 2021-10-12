@@ -31,15 +31,18 @@
 #include <pthread.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include "led_control.h"
 
-#define STRSIZE 2
+#define STRSIZE 256
 
 int main(int argc, char** argv)
 {
 	int led, on_off, i;
-	FILE *fp;
+	int fd;
+	int dirfd = 0;
+	char dir[STRSIZE];
 	char get_fifo_scroll[STRSIZE], seconds_bet_toggle[10];
 
 	for (i = 1; i < argc; i++) {
@@ -72,26 +75,32 @@ int main(int argc, char** argv)
 	 * if it is, we will inform user, and bail
 	 */
 	snprintf(get_fifo_scroll, STRSIZE, "%d", 0);
-	fp = fopen("/home/root/.intelFPGA/frequency_fifo_scroll", "w");
-	if (fp == NULL) {
+	snprintf(dir, STRSIZE, "/home/root/.intelFPGA/frequency_fifo_scroll");
+	fd = openat(dirfd, dir, O_WRONLY);
+	if (fd == -1) {
 		printf("Failed opening fifo frequency_fifo_scroll\n");
 		return -1;
 	}
-	fputs(get_fifo_scroll, fp);
-	fclose(fp);
-	fp = fopen("/home/root/.intelFPGA/get_scroll_fifo", "r");
-	if (fp == NULL) {
+	if (write(fd, get_fifo_scroll, STRSIZE-1) == -1) {
+		printf("Failed opening fifo frequency_fifo_scroll\n");
+		return -1;
+	}
+	close(fd);
+
+	snprintf(dir, STRSIZE, "/home/root/.intelFPGA/get_scroll_fifo");
+	fd = openat(dirfd, dir, O_RDONLY);
+	if (fd == -1) {
 		printf("Failed opening fifo get_scroll_fifo\n");
 		return -1;
 	}
-	
-	if (fgets(seconds_bet_toggle, 10, fp) == NULL)
+
+	if (read(fd, seconds_bet_toggle, 10) == -1)
 	{
 		printf("Failed opening toggle\n");
                 return -1;
 	}
-	
-	fclose(fp);
+
+	close(fd);
 	if (atoi(seconds_bet_toggle) > 0) {
 		printf("LED is scrolling.\n");
 		printf("Disable scroll_client before changing blink delay\n");
