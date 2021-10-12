@@ -31,6 +31,7 @@
 #include <pthread.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include "led_control.h"
 
@@ -38,12 +39,13 @@
 
 int main(int argc, char** argv)
 {
-	FILE *fp;
+	int fd;
 	int led, delay_ms, i;
 	char trigger[] = "timer";
 	char dir[STRSIZE];
 	char delay[STRSIZE];
 	int blink_interval_ms;
+	int dirfd = 0;
 
 	for (i = 1; i < argc; i++) {
 		if (strcmp("--help", argv[i]) == 0) {
@@ -76,26 +78,34 @@ int main(int argc, char** argv)
 	*/
 	char get_fifo_scroll[STRSIZE], seconds_bet_toggle[10];
 	snprintf(get_fifo_scroll, STRSIZE-1, "0");
-	fp = fopen("/home/root/.intelFPGA/frequency_fifo_scroll", "w");
-	if (fp == NULL) {
+	snprintf(dir, STRSIZE-1, "/home/root/.intelFPGA/frequency_fifo_scroll");
+	fd = openat(dirfd, dir, O_WRONLY);
+	if (fd == -1) {
 		printf("Failed opening fifo frequency_fifo_scroll\n");
 		return -1;
 	}
-	fputs(get_fifo_scroll, fp);
-	fclose(fp);
-	fp = fopen("/home/root/.intelFPGA/get_scroll_fifo", "r");
-	if (fp == NULL) {
+
+	if (write(fd, get_fifo_scroll, STRSIZE-1) == -1)
+	{
+		printf("Failed opening fifo frequency_fifo_scroll\n");
+		return -1;
+	}
+	close(fd);
+
+	snprintf(dir, STRSIZE-1, "/home/root/.intelFPGA/get_scroll_fifo");
+	fd = openat(dirfd, dir, O_RDONLY);
+	if (fd == -1) {
 		printf("Failed opening fifo get_scroll_fifo\n");
 		return -1;
 	}
-	
-	if (fgets(seconds_bet_toggle, 10, fp) == NULL)
+
+	if (read(fd, seconds_bet_toggle, 10) == -1)
 	{
 		printf("Failed opening fifo frequency_fifo_scroll\n");
-                return -1;
+        return -1;
 	}
-	
-	fclose(fp);
+	close(fd);
+
 	if (atoi(seconds_bet_toggle) > 0) {
 		printf("LED is scrolling.\n");
 		printf("Disable scroll_client before changing blink delay\n");
@@ -110,30 +120,30 @@ int main(int argc, char** argv)
 	setLEDtrigger(led, trigger, sizeof(trigger));
 	/* Setting the delay */
 	snprintf(dir, STRSIZE-1, "/sys/class/leds/fpga_led%d/delay_on", led);
-	if ((fp = fopen(dir, "w")) == NULL) {
+	if ((fd = openat(dirfd, dir, O_WRONLY)) == -1) {
 		printf("Failed to open the file %s\n" , dir);
 	}
 	else {
 		snprintf(delay, STRSIZE-1,"%d", blink_interval_ms);
-		if (fwrite(delay, 1, sizeof(delay), fp) == 0)
+		if (write(fd, delay, sizeof(delay)) == -1)
 		{
-			fclose(fp);
+			close(fd);
 			return -1;
 		}
-		fclose(fp);
+		close(fd);
 	}
 	snprintf(dir, STRSIZE-1,"/sys/class/leds/fpga_led%d/delay_off", led);
-	if ((fp = fopen(dir, "w")) == NULL) {
+	if ((fd = openat(dirfd, dir, O_WRONLY)) == -1) {
 		printf("Failed to open the file %s\n" , dir);
 	}
 	else {
 		snprintf(delay, STRSIZE-1,"%d", blink_interval_ms);
-                if (fwrite(delay, 1, sizeof(delay), fp) == 0)
+                if (write(fd, delay, sizeof(delay)) == -1)
                 {
-                        fclose(fp);
+                        close(fd);
                         return -1;
                 }
-		fclose(fp);
+		close(fd);
 	}
 
 	return 0;
