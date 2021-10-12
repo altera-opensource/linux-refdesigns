@@ -31,40 +31,47 @@
 #include <pthread.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #define STRSIZE 256
 
 void setLEDtrigger(int ledno, char* trigger, int size)
 {
-	FILE *fp;
+	int fd;
 	char dir[STRSIZE];
+	int dirfd = 0;
 
 	snprintf(dir, STRSIZE-1, "/sys/class/leds/fpga_led%d/trigger", ledno);
 
-	if ((fp = fopen(dir, "w")) == NULL) {
+	if ((fd = openat(dirfd, dir, O_WRONLY)) == -1) {
 		printf("Failed to open the file %s\n", dir);
 	}
 	else {
-		fwrite(trigger, 1, size, fp);
-		fclose(fp);
+		if (write(fd, trigger, sizeof(size)) == -1) {
+			printf("Failed to open the file %s\n", dir);
+		}
+		close(fd);
 	}
 }
 
 void setLEDBrightness(int ledno, int brightness)
 {
-	FILE *fp;
+	int fd;
 	char dir[STRSIZE];
 	char brightness_char[STRSIZE];
+	int dirfd = 0 ;
 
 	snprintf(dir, STRSIZE-1, "/sys/class/leds/fpga_led%d/brightness", ledno);
 	snprintf(brightness_char, STRSIZE-1, "%d", brightness);
 
-	if ((fp = fopen(dir, "w")) == NULL) {
+	if ((fd = openat(dirfd, dir, O_WRONLY)) == -1) {
 		printf("Failed to open the file %s\n", dir);
 	}
 	else {
-		fwrite(brightness_char, 1, sizeof(brightness_char), fp);
-		fclose(fp);
+		if (write(fd, brightness_char, sizeof(brightness_char)) == -1) {
+			printf("Failed to open the file %s\n", dir);
+		}
+		close(fd);
 	}
 }
 
