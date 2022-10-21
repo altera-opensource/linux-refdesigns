@@ -35,6 +35,7 @@
 #include <stdbool.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <ifaddrs.h>
 #include <unistd.h>
 #include "safe_str_lib.h"
 
@@ -343,24 +344,28 @@ void print_leds() {
 	}
 }
 
-void print_ip() {
-	int fd;
-	struct ifreq ifr;
+int print_ip() {
+	struct ifaddrs *ifad, *ifa;
+	struct sockaddr_in *skaddr;
+	char *addr;
 
-	if((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-		mvprintw(row, 0, "IPv4 Address");
-		mvprintw(row++, INDENT, ": N/A");
+	if (getifaddrs(&ifad) != -1) {
+		for (ifa=ifad; ifa!=NULL; ifa=ifa->ifa_next) {
+			if (ifa->ifa_addr && ifa->ifa_addr->sa_family==AF_INET) {
+				skaddr = (struct sockaddr_in *)ifa->ifa_addr;
+				addr = inet_ntoa(skaddr->sin_addr);
+				mvprintw(row, 0, "%s ", ifa->ifa_name);
+				mvprintw(row++, INDENT, ": %s", addr);
+			}
+		}
+		freeifaddrs(ifad);
 	}
 	else {
-		ifr.ifr_addr.sa_family = AF_INET;
-		strcpy_s(ifr.ifr_name, IFNAMSIZ-1, "eth0");
-		ioctl(fd, SIOCGIFADDR, &ifr);
-		close(fd);
-		mvprintw(row, 0, "IPv4 Address");
-		mvprintw(row++, INDENT, ": %s", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
+		return false;
 	}
 
 	row++;
+	return true;
 }
 
 void print_header() {
@@ -387,7 +392,11 @@ int main(int argc, char *argv[])
 		print_header();
 		print_all_hwmon();
 		print_usb();
-		print_ip();
+		if (!print_ip()) {
+			endwin();
+			printf("Failed to get network interface\n");
+			return -1;
+		}
 		print_uart();
 		print_sysid();
 		print_leds();
