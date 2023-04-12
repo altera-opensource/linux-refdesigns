@@ -38,11 +38,12 @@
 
 
 
-int snprintf_s_i(char *dest, size_t dmax, const char *format, int a);
-int snprintf_s_si(char *dest, size_t dmax, const char *format, char *s, int a);
-int snprintf_s_l(char *dest, size_t dmax, const char *format, long a);
-int snprintf_s_sl(char *dest, size_t dmax, const char *format, char *s, long a);
+int snprintf_s_i(char *dest, size_t  dmax, const char *format, int a);
+int snprintf_s_si(char *dest, size_t  dmax, const char *format, char *s, int a);
+int snprintf_s_l(char *dest, size_t  dmax, const char *format, long a);
+int snprintf_s_sl(char *dest, size_t  dmax, const char *format, char *s, long a);
 
 
 
 #endif /* SPRINTF_S_H_ */
+

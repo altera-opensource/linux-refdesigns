@@ -1,9 +1,9 @@
 /*------------------------------------------------------------------
  * ignore_handler_s.c
  *
- * 2012, Jonathan Toppins <jtoppins@users.sourceforge.net>
- *
+ * Copyright (c) 2012 Jonathan Toppins <jtoppins@users.sourceforge.net>
  * Copyright (c) 2012 Cisco Systems
+ * Copyright (c) 2018-2022 Intel Corp
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -65,8 +65,8 @@
 void ignore_handler_s(const char *msg, void *ptr, errno_t error)
 {
 
-	sldebug_printf("IGNORE CONSTRAINT HANDLER: (%u) %s\n", error,
-		       (msg) ? msg : "Null message");
-	return;
+    sldebug_printf("IGNORE CONSTRAINT HANDLER: (%u) %s\n", error,
+               (msg) ? msg : "Null message");
+    return;
 }
 EXPORT_SYMBOL(ignore_handler_s)

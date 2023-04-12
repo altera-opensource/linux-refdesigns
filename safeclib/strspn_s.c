@@ -1,9 +1,8 @@
 /*------------------------------------------------------------------
  * strspn_s.c
  *
- * November 2008, Bo Berry
- *
- * Copyright (c) 2008-2011, 2013 by Cisco Systems, Inc
+ * Copyright (c) 2008 Bo Berry
+ * Copyright (c) 2008-2011, 2013 Cisco Systems
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -136,7 +135,7 @@ strspn_s (const char *dest, rsize_t dmax,
         return RCNEGATE(ESLEMAX);
     }
 
-    while (*dest && dmax) {
+    while (dmax && *dest) {
 
         /*
          * Scan the entire src string for each dest character, counting

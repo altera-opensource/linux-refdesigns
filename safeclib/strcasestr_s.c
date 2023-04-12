@@ -1,9 +1,9 @@
 /*------------------------------------------------------------------
  * strcasestr_s.c
  *
- * November 2008, Bo Berry
- *
- * Copyright (c) 2008-2011 by Cisco Systems, Inc
+ * Copyright (c) 2008 Bo Berry
+ * Copyright (c) 2008-2011 Cisco Systems
+ * Copyright (c) 2018-2022 Intel Corp
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -145,7 +145,7 @@ strcasestr_s (char *dest, rsize_t dmax,
         return (EOK);
     }
 
-    while (*dest && dmax) {
+    while (dmax && *dest) {
         i = 0;
         len = slen;
         dlen = dmax;

@@ -1,8 +1,6 @@
 /*------------------------------------------------------------------
  * wmemcpy_s
  *
- * AUgust 2014, D. Wheeler
- *
  * Copyright (c) 2014 Intel Corp
  * All rights reserved.
  *
@@ -91,7 +89,7 @@
 errno_t
 wmemcpy_s(wchar_t* dest, rsize_t dmax, const wchar_t* src, rsize_t smax)
 {
-	wchar_t *dp;
+    wchar_t *dp;
     const wchar_t  *sp;
 
     dp = dest;

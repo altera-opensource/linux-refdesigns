@@ -1,10 +1,10 @@
 /*------------------------------------------------------------------
  * safe_lib.h -- Safe C Library
  *
- * October 2008, Bo Berry
- * Modified 2012, Jonathan Toppins <jtoppins@users.sourceforge.net>
- *
+ * Copyright (c) 2008 Bo Berry
+ * Copyright (c) 2012 Jonathan Toppins <jtoppins@users.sourceforge.net>
  * Copyright (c) 2008-2013 by Cisco Systems, Inc
+ * Copyright (c) 2021-2022 by Intel Corp
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -33,6 +33,22 @@
 #ifndef __SAFE_LIB_H__
 #define __SAFE_LIB_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Define safe_lib version number */
+#define SAFEC_VERSION_MAJOR 1
+#define SAFEC_VERSION_MINOR 2
+#define SAFEC_VERSION_PATCH 0
+#define SAFEC_VERSION_STRING "1.2.0"
+
+#define SAFEC_VERSION_NUM(a,b,c) (((a) << 16L) | ((b) << 8) | (c))
+#define SAFEC_VERSION \
+  SAFEC_VERSION_NUM(SAFEC_VERSION_MAJOR, \
+                    SAFEC_VERSION_MINOR, \
+                    SAFEC_VERSION_PATCH)
+
 #include "safe_types.h"
 #include "safe_lib_errno.h"
 
@@ -58,4 +74,7 @@ extern void ignore_handler_s(const char *msg, void *ptr, errno_t error);
 #include "safe_mem_lib.h"
 #include "safe_str_lib.h"
 
+#ifdef __cplusplus
+}
+#endif
 #endif /* __SAFE_LIB_H__ */

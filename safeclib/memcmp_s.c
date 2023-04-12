@@ -1,8 +1,7 @@
 /*------------------------------------------------------------------
  * memcmp_s.c - Compares memory
  *
- * October 2008, Bo Berry
- *
+ * Copyright (c) 2008 Bo Berry
  * Copyright (c) 2008-2011 Cisco Systems
  * All rights reserved.
  *
@@ -33,16 +32,15 @@
 #include "safe_mem_constraint.h"
 #include "safe_mem_lib.h"
 
-
 /**
  * NAME
- *    memcmp_s
+ *    memcmp16_s
  *
  * SYNOPSIS
  *    #include "safe_mem_lib.h"
  *    errno_t
- *    memcmp_s(const void *dest, rsize_t dmax,
- *             const void *src,  rsize_t smax, int *diff)
+ *    memcmp16_s(const uint16_t *dest, rsize_t dmax,
+ *               const uint16_t *src,  rsize_t smax, int *diff)
  *
  * DESCRIPTION
  *    Compares memory until they differ, and their difference is
@@ -53,14 +51,14 @@
  *    and system software interfaces, Extensions to the C Library,
  *    Part I: Bounds-checking interfaces
  *
- * INPUT PARAMETERS
+ *  INPUT PARAMETERS
  *    dest      pointer to memory to compare against
  *
- *    dmax      maximum length of dest, in bytess
+ *    dmax      maximum length of dest, in uint16_t
  *
  *    src       pointer to the source memory to compare with dest
  *
- *    smax      length of the source memory block
+ *    smax      maximum length of src, in uint16_t
  *
  *    *diff     pointer to the diff which is an integer greater
  *              than, equal to or less than zero according to
@@ -84,15 +82,16 @@
  *    ESLEMAX    length exceeds max limit
  *
  * ALSO SEE
- *    memcmp16_s(), memcmp32_s()
+ *    memcmp_s(), memcmp32_s()
  *
  */
 errno_t
-memcmp_s (const void *dest, rsize_t dmax,
-          const void *src,  rsize_t smax, int *diff)
+memcmp16_s (const uint16_t *dest, rsize_t dmax,
+            const uint16_t *src,  rsize_t smax, int *diff)
 {
-    const uint8_t *dp;
-    const uint8_t *sp;
+
+    const uint16_t *dp;
+    const uint16_t *sp;
 
     dp = dest;
     sp = src;
@@ -101,46 +100,46 @@ memcmp_s (const void *dest, rsize_t dmax,
      * must be able to return the diff
      */
     if (diff == NULL) {
-        invoke_safe_mem_constraint_handler("memcmp_s: diff is null",
+        invoke_safe_mem_constraint_handler("memcmp16_s: diff is null",
                    NULL, ESNULLP);
         return (RCNEGATE(ESNULLP));
     }
     *diff = -1;  /* default diff */
 
     if (dp == NULL) {
-        invoke_safe_mem_constraint_handler("memcmp_s: dest is null",
+        invoke_safe_mem_constraint_handler("memcmp16_s: dest is null",
                    NULL, ESNULLP);
         return (RCNEGATE(ESNULLP));
     }
 
     if (sp == NULL) {
-        invoke_safe_mem_constraint_handler("memcmp_s: src is null",
+        invoke_safe_mem_constraint_handler("memcmp16_s: src is null",
                    NULL, ESNULLP);
         return (RCNEGATE(ESNULLP));
     }
 
     if (dmax == 0) {
-        invoke_safe_mem_constraint_handler("memcmp_s: dmax is 0",
+        invoke_safe_mem_constraint_handler("memcmp16_s: dmax is 0",
                    NULL, ESZEROL);
         return (RCNEGATE(ESZEROL));
     }
 
-    if (dmax > RSIZE_MAX_MEM) {
-        invoke_safe_mem_constraint_handler("memcmp_s: dmax exceeds max",
+    if (dmax > RSIZE_MAX_MEM16) {
+        invoke_safe_mem_constraint_handler("memcmp16_s: dmax exceeds max",
                    NULL, ESLEMAX);
         return (RCNEGATE(ESLEMAX));
     }
 
     if (smax == 0) {
-        invoke_safe_mem_constraint_handler("memcmp_s: smax is 0",
+        invoke_safe_mem_constraint_handler("memcmp16_s: smax is 0",
                    NULL, ESZEROL);
         return (RCNEGATE(ESZEROL));
     }
 
     if (smax > dmax) {
-        invoke_safe_mem_constraint_handler("memcmp_s: smax exceeds dmax",
-                   NULL, ESLEMAX);
-        return (RCNEGATE(ESLEMAX));
+       invoke_safe_mem_constraint_handler("memcmp16_s: smax exceeds dmax",
+                  NULL, ESLEMAX);
+       return (RCNEGATE(ESLEMAX));
     }
 
     /*
@@ -155,10 +154,9 @@ memcmp_s (const void *dest, rsize_t dmax,
      * now compare sp to dp
      */
     *diff = 0;
-    while (dmax > 0 && smax > 0) {
+    while (dmax != 0 && smax != 0) {
         if (*dp != *sp) {
-            /***  *diff = *dp - *sp; ***/
-            *diff = *dp < *sp ? -1 : 1;
+            *diff = *dp - *sp;
             break;
         }
 
@@ -171,4 +169,4 @@ memcmp_s (const void *dest, rsize_t dmax,
 
     return (RCNEGATE(EOK));
 }
-EXPORT_SYMBOL(memcmp_s)
+EXPORT_SYMBOL(memcmp16_s)

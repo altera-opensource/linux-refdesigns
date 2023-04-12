@@ -1,8 +1,6 @@
 /*------------------------------------------------------------------
  * wmemcmp_s.c - Compares memory
  *
- * September 2014, D. Wheeler
- *
  * Copyright (c) 2014 Intel Corp
  * All rights reserved.
  *

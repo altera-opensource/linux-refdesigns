@@ -1,9 +1,9 @@
 /*------------------------------------------------------------------
  * safeclib_private.h - Internal library references
  *
- * 2012, Jonathan Toppins <jtoppins@users.sourceforge.net>
- *
- * Copyright (c) 2012, 2013 by Cisco Systems, Inc
+ * Copyright (c) 2012 Jonathan Toppins <jtoppins@users.sourceforge.net>
+ * Copyright (c) 2012-2013 Cisco Systems, Inc
+ * Copyright (c) 2022 Intel Corp
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person

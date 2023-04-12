@@ -1,8 +1,7 @@
 /*------------------------------------------------------------------
  * mem_primitives_lib.c - Unguarded Memory Copy Routines
  *
- * February 2005, Bo Berry
- *
+ * Copyright (c) 2005 Bo Berry
  * Copyright (c) 2005-2009 Cisco Systems
  * All rights reserved.
  *

@@ -1,8 +1,6 @@
 /*------------------------------------------------------------------
  * wcsnlen_s.c
  *
- * August 2014, D Wheeler
- *
  * Copyright (c) 2014 by Intel Corp
  * All rights reserved.
  *
@@ -102,7 +100,7 @@ wcsnlen_s (const wchar_t *dest, rsize_t dmax)
     }
 
     count = 0;
-    while (*dest && dmax) {
+    while (dmax && *dest) {
         count++;
         dmax--;
         dest++;

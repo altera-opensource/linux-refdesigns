@@ -1,9 +1,8 @@
 /*------------------------------------------------------------------
  * strishex_s.c
  *
- * October 2008, Bo Berry
- *
- * Copyright (c) 2008-2011, 2013 by Cisco Systems, Inc
+ * Copyright (c) 2008 Bo Berry
+ * Copyright (c) 2008-2011, 2013 Cisco Systems
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -101,7 +100,7 @@ strishex_s (const char *dest, rsize_t dmax)
         return (false);
     }
 
-    while (*dest && dmax) {
+    while (dmax && *dest) {
 
         if (((*dest >= '0') && (*dest <= '9')) ||
             ((*dest >= 'a') && (*dest <= 'f')) ||

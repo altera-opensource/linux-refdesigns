@@ -1,8 +1,7 @@
 /*------------------------------------------------------------------
  * memmove_s.c
  *
- * October 2008, Bo Berry
- *
+ * Copyright (c) 2008 Bo Berry
  * Copyright (c) 2008-2011 Cisco Systems
  * All rights reserved.
  *
@@ -33,7 +32,6 @@
 #include "safe_mem_constraint.h"
 #include "mem_primitives_lib.h"
 #include "safe_mem_lib.h"
-
 
 /**
  * NAME

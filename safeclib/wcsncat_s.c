@@ -1,8 +1,6 @@
 /*------------------------------------------------------------------
  * wcsncat_s.c
  *
- * August 2014, D Wheeler
- *
  * Copyright (c) 2014 by Intel Corp
  * All rights reserved.
  *

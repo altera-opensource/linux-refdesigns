@@ -1,10 +1,10 @@
 /*------------------------------------------------------------------
  * safe_lib_errno.h -- Safe C Lib Error codes
  *
- * October 2008, Bo Berry
- * Modified 2012, Jonathan Toppins <jtoppins@users.sourceforge.net>
- *
+ * Copyright (c) 2008 Bo Berry
+ * Copyright (c) 2012 Jonathan Toppins <jtoppins@users.sourceforge.net>
  * Copyright (c) 2008-2013 by Cisco Systems, Inc
+ * Copyright (c) 2021 by Intel Corp
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person

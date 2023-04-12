@@ -1,8 +1,7 @@
 /*------------------------------------------------------------------
  * memmove16_s.c
  *
- * October 2008, Bo Berry
- *
+ * Copyright (c) 2008 Bo Berry
  * Copyright (c) 2008-2011 Cisco Systems
  * All rights reserved.
  *

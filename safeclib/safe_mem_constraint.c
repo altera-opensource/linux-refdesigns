@@ -1,10 +1,10 @@
 /*------------------------------------------------------------------
  * safe_mem_constraint.c
  *
- * October 2008, Bo Berry
- * 2012, Jonathan Toppins <jtoppins@users.sourceforge.net>
- *
+ * Copyright (c) 2008 Bo Berry
+ * Copyright (c) 2012 Jonathan Toppins <jtoppins@users.sourceforge.net>
  * Copyright (c) 2008-2012 Cisco Systems
+ * Copyright (c) 2018 Intel Corp
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -34,9 +34,7 @@
 #include "safe_mem_constraint.h"
 #include "safe_mem_lib.h"
 
-
 static constraint_handler_t mem_handler = NULL;
-
 
 /**
  * NAME

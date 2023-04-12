@@ -1,9 +1,9 @@
 /*------------------------------------------------------------------
  * strcmp_s.c -- string compare
  *
- * November 2008, Bo Berry
- *
- * Copyright (c) 2008-2011 by Cisco Systems, Inc
+ * Copyright (c) 2008 Bo Berry
+ * Copyright (c) 2008-2011 Cisco Systems
+ * Copyright (c) 2018-2022 Intel Corp
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -32,7 +32,6 @@
 #include "safeclib_private.h"
 #include "safe_str_constraint.h"
 #include "safe_str_lib.h"
-
 
 /**
  * NAME

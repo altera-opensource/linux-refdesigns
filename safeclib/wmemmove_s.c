@@ -1,8 +1,6 @@
 /*------------------------------------------------------------------
  * wmemmove_s.c
  *
- * August 2014, D Wheeler
- *
  * Copyright (c) 2014 Intel Corp
  * All rights reserved.
  *

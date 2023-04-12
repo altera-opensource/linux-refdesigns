@@ -1,9 +1,8 @@
 /*------------------------------------------------------------------
  * safe_types.h - C99 std types & defs or Linux kernel equivalents
  *
- * March 2007, Bo Berry
- * Modified 2012, Jonathan Toppins <jtoppins@users.sourceforge.net>
- *
+ * Copyright (c) 2007 Bo Berry
+ * Copyright (c) 2012 Jonathan Toppins <jtoppins@users.sourceforge.net>
  * Copyright (c) 2007-2013 by Cisco Systems, Inc
  * All rights reserved.
  *

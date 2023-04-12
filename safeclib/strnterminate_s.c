@@ -1,9 +1,8 @@
 /*------------------------------------------------------------------
  * strnterminate_s.c
  *
- * February 2011, Bo Berry
- *
- * Copyright (c) 2011 by Cisco Systems, Inc
+ * Copyright (c) 2011 Bo Berry
+ * Copyright (c) 2011 Cisco Systems
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person

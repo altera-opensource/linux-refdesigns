@@ -1,10 +1,9 @@
 /*------------------------------------------------------------------
  * safe_mem_lib.h -- Safe C Library Memory APIs
  *
- * October 2008, Bo Berry
- * Modified 2012, Jonathan Toppins <jtoppins@users.sourceforge.net>
- *
- * Copyright (c) 2008-2012 by Cisco Systems, Inc.
+ * Copyright (c) 2008 Bo Berry
+ * Copyright (c) 2012 Jonathan Toppins <jtoppins@users.sourceforge.net>
+ * Copyright (c) 2008-2012 by Cisco Systems, Inc
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -57,6 +56,10 @@ extern errno_t memcmp16_s(const uint16_t *dest, rsize_t dmax,
 extern errno_t memcmp32_s(const uint32_t *dest, rsize_t dmax,
                           const uint32_t *src, rsize_t slen, int *diff);
 
+/* wide compare memory */
+extern errno_t wmemcmp_s(const wchar_t *dest, rsize_t dmax,
+                         const wchar_t *src,  rsize_t smax, int *diff);
+
 
 /* copy memory */
 extern errno_t memcpy_s(void *dest, rsize_t dmax,
@@ -100,6 +103,9 @@ extern errno_t memset16_s(uint16_t *dest, rsize_t dmax, uint16_t value);
 
 /* set uint32_t */
 extern errno_t memset32_s(uint32_t *dest, rsize_t dmax, uint32_t value);
+
+/* wide set bytes */
+extern errno_t wmemset_s(wchar_t *dest, wchar_t value, rsize_t len);
 
 
 /* byte zero */

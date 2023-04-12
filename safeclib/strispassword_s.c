@@ -1,9 +1,8 @@
 /*------------------------------------------------------------------
  * strispassword_s.c
  *
- * October 2008, Bo Berry
- *
- * Copyright (c) 2008-2011, 2013 by Cisco Systems, Inc
+ * Copyright (c) 2008 Bo Berry
+ * Copyright (c) 2008-2011, 2013 Cisco Systems
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person

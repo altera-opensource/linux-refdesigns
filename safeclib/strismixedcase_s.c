@@ -1,9 +1,9 @@
 /*------------------------------------------------------------------
  * strismixedcase_s.c
  *
- * November 2008, Bo Berry
- *
- * Copyright (c) 2008-2011, 2013 by Cisco Systems, Inc
+ * Copyright (c) 2008 Bo Berry
+ * Copyright (c) 2008-2011, 2013 Cisco Systems
+ * Copyright (c) 2022 Intel Corp
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -104,7 +104,7 @@ strismixedcase_s (const char *dest, rsize_t dmax)
         return (false);
     }
 
-    while (*dest) {
+    while (dmax && *dest) {
 
         if (((*dest >= 'a') && (*dest <= 'z'))  ||
             ((*dest >= 'A') && (*dest <= 'Z'))) {

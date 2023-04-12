@@ -1,10 +1,9 @@
 /*------------------------------------------------------------------
  * safe_str_constraint.c
  *
- * October 2008, Bo Berry
- * 2012, Jonathan Toppins <jtoppins@users.sourceforge.net>
- *
- * Copyright (c) 2008, 2009, 2012 Cisco Systems
+ * Copyright (c) 2008 Bo Berry
+ * Copyright (c) 2012 Jonathan Toppins <jtoppins@users.sourceforge.net>
+ * Copyright (c) 2008-2012 Cisco Systems
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person

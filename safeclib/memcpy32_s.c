@@ -1,9 +1,9 @@
 /*------------------------------------------------------------------
  * memcpy32_s
  *
- * October 2008, Bo Berry
- *
+ * Copyright (c) 2008 Bo Berry
  * Copyright (c) 2008-2011 Cisco Systems
+ * Copyright (c) 2018-2022 Intel Corp
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -33,7 +33,6 @@
 #include "safe_mem_constraint.h"
 #include "mem_primitives_lib.h"
 #include "safe_mem_lib.h"
-
 
 /**
  * NAME

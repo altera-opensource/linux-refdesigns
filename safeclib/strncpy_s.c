@@ -1,9 +1,8 @@
 /*------------------------------------------------------------------
  * strncpy_s.c
  *
- * October 2008, Bo Berry
- *
- * Copyright (c) 2008-2011 by Cisco Systems, Inc
+ * Copyright (c) 2008 Bo Berry
+ * Copyright (c) 2008-2011 Cisco Systems
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -159,7 +158,7 @@ strncpy_s (char *dest, rsize_t dmax, const char *src, rsize_t slen)
                 return RCNEGATE(ESOVRLP);
             }
 
-	    if (slen == 0) {
+        if (slen == 0) {
                 /*
                  * Copying truncated to slen chars.  Note that the TR says to
                  * copy slen chars plus the null char.  We null the slack.
@@ -198,7 +197,7 @@ strncpy_s (char *dest, rsize_t dmax, const char *src, rsize_t slen)
                 return RCNEGATE(ESOVRLP);
             }
 
-	    if (slen == 0) {
+        if (slen == 0) {
                 /*
                  * Copying truncated to slen chars.  Note that the TR says to
                  * copy slen chars plus the null char.  We null the slack.

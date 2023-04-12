@@ -1,9 +1,8 @@
 /*------------------------------------------------------------------
  * strnlen_s.c
  *
- * October 2008, Bo Berry
- *
- * Copyright (c) 2008-2011 by Cisco Systems, Inc
+ * Copyright (c) 2008 Bo Berry
+ * Copyright (c) 2008-2011 Cisco Systems
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -101,7 +100,7 @@ strnlen_s (const char *dest, rsize_t dmax)
     }
 
     count = 0;
-    while (*dest && dmax) {
+    while (dmax && *dest) {
         count++;
         dmax--;
         dest++;

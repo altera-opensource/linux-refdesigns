@@ -1,9 +1,8 @@
 /*------------------------------------------------------------------
  * strcspn_s.c
  *
- * November 2008, Bo Berry
- *
- * Copyright (c) 2008-2011 by Cisco Systems, Inc
+ * Copyright (c) 2008 Bo Berry
+ * Copyright (c) 2008-2011 Cisco Systems
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -138,7 +137,7 @@ strcspn_s (const char *dest, rsize_t dmax,
         return RCNEGATE(ESLEMAX);
     }
 
-    while (*dest && dmax) {
+    while (dmax && *dest) {
 
         /*
          * Scanning for exclusions, so if there is a match,
