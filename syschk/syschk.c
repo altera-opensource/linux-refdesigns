@@ -46,6 +46,7 @@
 #define INDENT 22
 #define MAX_TEXT_OUTPUT 30
 #define STRSIZE 64
+#define MAX_STRSIZE 512 
 
 /* The current row to be written to. row2 stores current row for 2nd column */
 int row, row2;
@@ -95,7 +96,7 @@ char* get_i2c_hwmon(char *i2c_address, char *pmbusname, char *type) {
 	char *label, *print, *filename;
 	label = strtok(pmbusname, "_");
 	filename = malloc((30 +
-		strnlen_s(i2c_address, sizeof(i2c_address)))*sizeof(char) + strnlen_s(label, sizeof(label)));
+		strnlen_s(i2c_address, MAX_STRSIZE))*sizeof(char) + strnlen_s(label, MAX_STRSIZE));
 
 	if (filename != NULL) {
 		strcpy_s(filename, STRSIZE-1, "/sys/bus/i2c/devices/");
@@ -141,7 +142,7 @@ void print_hwmon(char *device, char *i2c_address) {
 void print_all_hwmon() {
 	DIR *dir;
 	struct dirent *ent;
-	char *filename, *value;
+	char *filename, *value, *fs;
 
 	if ((dir = opendir("/sys/bus/i2c/devices")) != NULL) {
 		while ((ent = readdir (dir)) != NULL) {
@@ -155,27 +156,22 @@ void print_all_hwmon() {
 				strcpy_s(filename, STRSIZE-1, "/sys/bus/i2c/devices/");
 				strcat_s(filename, STRSIZE-1, ent->d_name);
 				strcat_s(filename, STRSIZE-1, "/name");
-				strcpy_s(value, 5, read_fs(filename));
-				if (value != NULL) {
-					if (strcmp(value, "pmbus") == 0) {
-						strcpy_s(filename, STRSIZE-1, "/sys/bus/i2c/devices/");
-						strcat_s(filename, STRSIZE-1, ent->d_name);
-						print_hwmon(filename, ent->d_name);
-					}
-					free(filename);
-					free(value);
+				fs = read_fs(filename);
+				strcpy_s(value, 5, fs);
+				if (strcmp(value, "pmbus") == 0) {
+				 	strcpy_s(filename, STRSIZE-1, "/sys/bus/i2c/devices/");
+					strcat_s(filename, STRSIZE-1, ent->d_name);
+					print_hwmon(filename, ent->d_name);
 				}
-				else {
-					printf ("Failed to allocate memory\n");
-					free(filename);
-					free(value);
-					return;
-				}
+				free(filename);
+				free(value);
+				free(fs);
 			}
 			else {
 				printf ("Failed to allocate memory\n");
 				free(filename);
 				free(value);
+				closedir(dir);
 				return;
 			}
 		}
@@ -186,10 +182,10 @@ void print_all_hwmon() {
 
 /* Check if the text will overflow to the next line and trim as necessary */
 void trim_overflow_characters(char *text) {
-	int char_overflow = (strnlen_s(text, sizeof(text)) + maxcol / 2 + INDENT) - maxcol + 2;
+	int char_overflow = (strnlen_s(text, MAX_STRSIZE) + maxcol / 2 + INDENT) - maxcol + 2;
 
 	if (char_overflow > 0)
-		text[strnlen_s(text, sizeof(text)) - char_overflow] = '\0';
+		text[strnlen_s(text, MAX_STRSIZE) - char_overflow] = '\0';
 }
 
 void print_usb() {
@@ -306,7 +302,7 @@ int check_screen() {
 void print_leds() {
 	DIR *dir;
 	struct dirent *ent;
-	char *filename, *value;
+	char *filename, *value, *fs;
 	if ((dir = opendir("/sys/class/leds")) != NULL) {
 		while ((ent = readdir (dir)) != NULL) {
 			if (strcmp(ent->d_name, ".") == 0 ||
@@ -319,20 +315,16 @@ void print_leds() {
 				strcpy_s(filename, STRSIZE-1, "/sys/class/leds/");
 				strcat_s(filename, STRSIZE-1, ent->d_name);
 				strcat_s(filename, STRSIZE-1, "/brightness");
-				strcpy_s(value, sizeof(value), read_fs(filename));
+				fs = read_fs(filename); 
+				strcpy_s(value, MAX_STRSIZE, fs);
 				free(filename);
 				mvprintw(row, 0, "%s", ent->d_name);
-				if (value != NULL) {
-					if(strcmp(value, "1") == 0)
-						mvprintw(row++, INDENT, ": ON");
-					else
-						mvprintw(row++, INDENT, ": OFF");
-					free(value);
-				}
-				else {
-					printf ("Failed to allocate memory\n");
-					free(value);
-				}
+			  if(strcmp(value, "1") == 0)
+					mvprintw(row++, INDENT, ": ON");
+				else
+					mvprintw(row++, INDENT, ": OFF");
+				free(value);
+				free(fs);
 			}
 			else {
 				printf ("Failed to allocate memory\n");
@@ -371,7 +363,7 @@ int print_ip() {
 void print_header() {
 	const char *header = "ALTERA SYSTEM CHECK";
 
-	mvprintw(0, maxcol/2-strnlen_s(header, sizeof(header))/2, "%s", header);
+	mvprintw(0, maxcol/2-strnlen_s(header, MAX_STRSIZE)/2, "%s", header);
 }
 
 int main(int argc, char *argv[])

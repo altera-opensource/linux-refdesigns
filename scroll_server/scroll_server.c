@@ -58,6 +58,7 @@ void* check_scroll_frequency_thread(void*foo)
 		if (fgets(readbuf, 10, fp) == NULL)
 		{
 			printf("Failed opening fifo read\n");
+			fclose(fp);
 			return NULL;
 		}
 		scroll_interval_tmp = atoi(readbuf);
@@ -116,9 +117,12 @@ int main(int argc, char** argv)
 	printf("Starting blinking LED server\n");
 
 	umask(0);
-	mkdir("/home/root/.intelFPGA", 0777);
-	mknod("/home/root/.intelFPGA/frequency_fifo_scroll", S_IFIFO|0666, 0);
-	mknod("/home/root/.intelFPGA/get_scroll_fifo", S_IFIFO|0666, 0);
+	if (mkdir("/home/root/.intelFPGA", 0777) != 0)
+		return 0;
+	if (mknod("/home/root/.intelFPGA/frequency_fifo_scroll", S_IFIFO|0666, 0) != 0)
+		return 0;
+	if (mknod("/home/root/.intelFPGA/get_scroll_fifo", S_IFIFO|0666, 0) != 0)
+		return 0;
 
 	pthread_t tid;
 	pthread_create(&tid, NULL, check_scroll_frequency_thread, NULL);

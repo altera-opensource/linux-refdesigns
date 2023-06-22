@@ -89,5 +89,7 @@
 #endif
 
 #include "safe_lib.h"
+#include "safe_mem_lib.h"
+#include "safe_str_lib.h"
 
 #endif /* __SAFECLIB_PRIVATE_H__ */
