@@ -1,17 +1,18 @@
+
 Table of Contents
 =================
 1. Soft IP Driver Example
 2. Application Examples
-
+3. GPIO's using new framework
 
 1. Soft IP Driver Example
 =========================
 GPIO driver for soft PIO in the FPGA domain serves as a reference for
 writing a simple driver in Linux. The source code of this driver is located in
 Linux source directory under the folder drivers/gpio/gpio-altera.c. The Linux
-source code can be obtained via git.rocketboards.org. The specification
-of soft PIO can be found in Embedded Peripherals IP User Guide - Altera
-(http://www.altera.com.my/literature/ug/ug_embedded_ip.pdf).
+source code can be obtained via https://github.com/altera-opensource/linux-socfpga.
+The specification of soft PIO can be found in Embedded Peripherals IP User Guide - Altera
+(https://www.intel.com/content/www/us/en/docs/programmable/683130/23-1/introduction.html).
 
 NOTE:
 This example does not serve as a full guideline on how to write a Linux Device
@@ -35,7 +36,7 @@ These examples serve as references for users to write their own applications
 to interact with soft IP through driver developed.
 
 The source codes of these applications can be found from the installation path
-of  (<Yocto_install_path>/meta-altera/recipes-gsrd).
+of  (https://github.com/altera-opensource/linux-refdesigns).
 
 The binaries of these applications can be found in /home/root/altera/. Please
 'cd' to /home/root/altera to execute these applications.
@@ -59,47 +60,357 @@ Scrolling FPGA LEDs with specified delay:
 	./scroll_client	      		; help message
 
 
-Application to register interrupt and write simple interrupt service routine
-----------------------------------------------------------------------------
-Detect user input from push button / DIP switch:
-	modprobe gpio_interrupt gpio_number=<n>
-
-When user presses the button or flips the dip switch, a message will be printed
-to kernel console.
-1. If the user connects to the console on board using serial connection,
-the message "Interrupt happened at gpio:<gpio_number>" will be printed on the
-console.
-2. If the user connects to the console on board using ssh, the message can be
-viewed from kernel log via "dmesg" command.
-
-Note: User will need to do "rmmod gpio_interrupt" prior in order to change
-gpio_number by calling "modprobe gpio_interrupt gpio_number=<n>" again
-
-User will need to get the GPIO number from /sys/class/gpio/ by using
-command 'ls'. E.g.
-
-	root@socfpga~:# ls /sys/class/gpio/
-	gpiochip150	gpiochip152	gpiochip156	gpiochip160
-	gpiochip192	gpiochip224
-
-From the listing, n can be obtained. The GPIO number may vary for different
-design with different device tree entries; this is due to the GPIO numbers are
-auto-assign by the kernel.
-
-To confirm the n is associated to which peripheral, user needs to match the
-label of the GPIO chip to the address of push button and DIP switch in device
-tree.
-e.g.
-	root@socfpga~:# cat /sys/class/gpio/gpiochip150/label
-	/sopc@0/bridge@0xc0000000/gpio@0x1000100C0
-
-In this reference design, DIP switch is at address 0x10080 while the push button
-is at address 0x100c0. So in this case GPIO number 150 - 151 are allocated to
-push button 0 - 1.
-
-
 Hello world application from HPS
 --------------------------------
 Print "Hello SoC FPGA!" message from HPS:
 	./hello
+
+
+3. GPIO's using new framework
+=============================
+
+libgpiod
+--------
+libgpiod C library and a package gpio tools for interacting with the linux
+GPIO's character device.
+
+The gpiod support following commands
+
+1. gpiodetect: Gives a list of all gpio's of gpiochip number
+
+2. gpioinfo  : Gives a list of all gpio's chips
+
+3. gpioget   : Gets the gpio line status
+
+4. gpioset   : Sets the gpio line state
+
+5. gpiomon   : Monitor/sets gpio line event(Interrupts)
+
+The gpiod library provides a structured approach to work with GPIO pins
+by using chip and line objects. In this library, a line represents a single
+GPIO pin, while a chip represents a hardware entity that may have multiple
+lines. It allows user to open a chip, retrieve specific lines, request
+access to a line, and perform read and write operations on the GPIO values.
+
+For more information, please refer to
+	https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/about/
+
+1. gpiodetect:
+
+	$ gpiodetect
+	gpiochip0 [ffc03300.gpio] (24 lines)		<-- HPS gpio's
+	gpiochip1 [/soc/gpio@f9001080] (32 lines)	<-- FPGA gpio's (chip 1 to 4)
+	gpiochip2 [/soc/gpio@f9001060] (32 lines)
+	gpiochip3 [/soc/gpio@f9001070] (32 lines)
+	gpiochip4 [/soc/gpio@f9001040] (32 lines)
+
+	gpiochip info
+
+	gpiochip0 :
+	-----------
+		gpiochip0 [ffc03300.gpio] (24 lines)
+
+		gpiochip0: pin 19 -- hps_led1
+		gpiochip0: pin 20 -- hps_led0
+		gpiochip0: pin 21 -- hps_led2
+
+		The gpiochip0 is connected to HPS-to-FPGA Bridge.
+
+	gpiochip1 :
+	----------
+		gpiochip1 [/soc/gpio@f9001080] (32 lines)
+		led_pio:
+
+		gpiochip1: pin 0 -- fpga_led0
+		gpiochip1: pin 1 -- fpga_led1
+		gpiochip1: pin 2 -- fpga_led2
+		gpiochip1: pin 3 -- fpga_led3
+
+		The gpiochip 1 to 4 connected to Lightweight HPS-to-FPGA
+
+	gpiochip2 :
+	-----------
+		gpiochip2 [/soc/gpio@f9001060] (32 lines)
+		button_pio:
+
+		gpiochip2: pin 0 -- S1
+		gpiochip2: pin 1 -- S2
+		gpiochip2: pin 2 -- S3
+		gpiochip2: pin 3 -- S4
+
+	gpiochip3 :
+	-----------
+		gpiochip3 [/soc/gpio@f9001070] (32 lines)
+		dipsw_pio:
+
+		gpiochip3: pin 0 -- SW2.SW0
+		gpiochip3: pin 1 -- SW2.SW1
+		gpiochip3: pin 2 -- SW2.SW2
+		gpiochip3: pin 3 -- SW2.SW3
+
+	For more information, refer:
+	https://www.rocketboards.org/foswiki/Documentation/AgilexSoCGSRD
+
+2. gpioinfo:
+
+	$gpioinfo
+	gpiochip0 - 24 lines:
+		line   0:      unnamed       unused   input  active-high
+		line   1:      unnamed       unused   input  active-high
+		line   2:      unnamed       unused   input  active-high
+		line   3:      unnamed       unused   input  active-high
+		line   4:      unnamed       unused   input  active-high
+		line   5:      unnamed       unused   input  active-high
+		line   6:      unnamed       unused   input  active-high
+		line   7:      unnamed       unused   input  active-high
+		line   8:      unnamed       unused   input  active-high
+		line   9:      unnamed       unused   input  active-high
+		line  10:      unnamed       unused   input  active-high
+		line  11:      unnamed       unused   input  active-high
+		line  12:      unnamed       unused   input  active-high
+		line  13:      unnamed       unused   input  active-high
+		line  14:      unnamed       unused   input  active-high
+		line  15:      unnamed       unused   input  active-high
+		line  16:      unnamed       unused   input  active-high
+		line  17:      unnamed       unused   input  active-high
+		line  18:      unnamed       unused   input  active-high
+		line  19:      unnamed   "hps_led1"  output  active-high [used]
+		line  20:      unnamed   "hps_led0"  output  active-high [used]
+		line  21:      unnamed   "hps_led2"  output  active-high [used]
+		line  22:      unnamed       unused   input  active-high
+		line  23:      unnamed       unused   input  active-high
+	gpiochip1 - 32 lines:
+		line   0:      unnamed  "fpga_led0"  output   active-low [used]
+		line   1:      unnamed  "fpga_led1"  output   active-low [used]
+		line   2:      unnamed  "fpga_led2"  output   active-low [used]
+		line   3:      unnamed  "fpga_led3"  output   active-low [used]
+		line   4:      unnamed       unused   input  active-high
+		line   5:      unnamed       unused   input  active-high
+		line   6:      unnamed       unused   input  active-high
+		line   7:      unnamed       unused   input  active-high
+		line   8:      unnamed       unused   input  active-high
+		line   9:      unnamed       unused   input  active-high
+		line  10:      unnamed       unused   input  active-high
+		line  11:      unnamed       unused   input  active-high
+		line  12:      unnamed       unused   input  active-high
+		line  13:      unnamed       unused   input  active-high
+		line  14:      unnamed       unused   input  active-high
+		line  15:      unnamed       unused   input  active-high
+		line  16:      unnamed       unused   input  active-high
+		line  17:      unnamed       unused   input  active-high
+		line  18:      unnamed       unused   input  active-high
+		line  19:      unnamed       unused   input  active-high
+		line  20:      unnamed       unused   input  active-high
+		line  21:      unnamed       unused   input  active-high
+		line  22:      unnamed       unused   input  active-high
+		line  23:      unnamed       unused   input  active-high
+		line  24:      unnamed       unused   input  active-high
+		line  25:      unnamed       unused   input  active-high
+		line  26:      unnamed       unused   input  active-high
+		line  27:      unnamed       unused   input  active-high
+		line  28:      unnamed       unused   input  active-high
+		line  29:      unnamed       unused   input  active-high
+		line  30:      unnamed       unused   input  active-high
+		line  31:      unnamed       unused   input  active-high
+	gpiochip2 - 32 lines:
+		line   0:      unnamed       unused   input  active-high
+		line   1:      unnamed       unused   input  active-high
+		line   2:      unnamed       unused   input  active-high
+		line   3:      unnamed       unused   input  active-high
+		line   4:      unnamed       unused   input  active-high
+		line   5:      unnamed       unused   input  active-high
+		line   6:      unnamed       unused   input  active-high
+		line   7:      unnamed       unused   input  active-high
+		line   8:      unnamed       unused   input  active-high
+		line   9:      unnamed       unused   input  active-high
+		line  10:      unnamed       unused   input  active-high
+		line  11:      unnamed       unused   input  active-high
+		line  12:      unnamed       unused   input  active-high
+		line  13:      unnamed       unused   input  active-high
+		line  14:      unnamed       unused   input  active-high
+		line  15:      unnamed       unused   input  active-high
+		line  16:      unnamed       unused   input  active-high
+		line  17:      unnamed       unused   input  active-high
+		line  18:      unnamed       unused   input  active-high
+		line  19:      unnamed       unused   input  active-high
+		line  20:      unnamed       unused   input  active-high
+		line  21:      unnamed       unused   input  active-high
+		line  22:      unnamed       unused   input  active-high
+		line  23:      unnamed       unused   input  active-high
+		line  24:      unnamed       unused   input  active-high
+		line  25:      unnamed       unused   input  active-high
+		line  26:      unnamed       unused   input  active-high
+		line  27:      unnamed       unused   input  active-high
+		line  28:      unnamed       unused   input  active-high
+		line  29:      unnamed       unused   input  active-high
+		line  30:      unnamed       unused   input  active-high
+		line  31:      unnamed       unused   input  active-high
+	gpiochip3 - 32 lines:
+		line   0:      unnamed       unused   input  active-high
+		line   1:      unnamed       unused   input  active-high
+		line   2:      unnamed       unused   input  active-high
+		line   3:      unnamed       unused   input  active-high
+		line   4:      unnamed       unused   input  active-high
+		line   5:      unnamed       unused   input  active-high
+		line   6:      unnamed       unused   input  active-high
+		line   7:      unnamed       unused   input  active-high
+		line   8:      unnamed       unused   input  active-high
+		line   9:      unnamed       unused   input  active-high
+		line  10:      unnamed       unused   input  active-high
+		line  11:      unnamed       unused   input  active-high
+		line  12:      unnamed       unused   input  active-high
+		line  13:      unnamed       unused   input  active-high
+		line  14:      unnamed       unused   input  active-high
+		line  15:      unnamed       unused   input  active-high
+		line  16:      unnamed       unused   input  active-high
+		line  17:      unnamed       unused   input  active-high
+		line  18:      unnamed       unused   input  active-high
+		line  19:      unnamed       unused   input  active-high
+		line  20:      unnamed       unused   input  active-high
+		line  21:      unnamed       unused   input  active-high
+		line  22:      unnamed       unused   input  active-high
+		line  23:      unnamed       unused   input  active-high
+		line  24:      unnamed       unused   input  active-high
+		line  25:      unnamed       unused   input  active-high
+		line  26:      unnamed       unused   input  active-high
+		line  27:      unnamed       unused   input  active-high
+		line  28:      unnamed       unused   input  active-high
+		line  29:      unnamed       unused   input  active-high
+		line  30:      unnamed       unused   input  active-high
+		line  31:      unnamed       unused   input  active-high
+	gpiochip4 - 32 lines:
+		line   0:      unnamed       unused   input  active-high
+		line   1:      unnamed       unused   input  active-high
+		line   2:      unnamed       unused   input  active-high
+		line   3:      unnamed       unused   input  active-high
+		line   4:      unnamed       unused   input  active-high
+		line   5:      unnamed       unused   input  active-high
+		line   6:      unnamed       unused   input  active-high
+		line   7:      unnamed       unused   input  active-high
+		line   8:      unnamed       unused   input  active-high
+		line   9:      unnamed       unused   input  active-high
+		line  10:      unnamed       unused   input  active-high
+		line  11:      unnamed       unused   input  active-high
+		line  12:      unnamed       unused   input  active-high
+		line  13:      unnamed       unused   input  active-high
+		line  14:      unnamed       unused   input  active-high
+		line  15:      unnamed       unused   input  active-high
+		line  16:      unnamed       unused   input  active-high
+		line  17:      unnamed       unused   input  active-high
+		line  18:      unnamed       unused   input  active-high
+		line  19:      unnamed       unused   input  active-high
+		line  20:      unnamed       unused   input  active-high
+		line  21:      unnamed       unused   input  active-high
+		line  22:      unnamed       unused   input  active-high
+		line  23:      unnamed       unused   input  active-high
+		line  24:      unnamed       unused   input  active-high
+		line  25:      unnamed       unused   input  active-high
+		line  26:      unnamed       unused   input  active-high
+		line  27:      unnamed       unused   input  active-high
+		line  28:      unnamed       unused   input  active-high
+		line  29:      unnamed       unused   input  active-high
+		line  30:      unnamed       unused   input  active-high
+		line  31:      unnamed       unused   input  active-high
+
+3. gpioget:
+
+	$gpioget gpiochip2 0
+	1
+
+	Press and hold push button S1 and then query gpiochip2
+	$gpioget gpiochip2 0
+	0
+
+	Set SW2.1 = OFF then query gpiochip3 which is the FPGA GPIO controller
+	connected to the external dip switches
+	$gpioget gpiochip3 0
+	1
+
+	Set SW2.1 = ON then query gpiochip3
+	$gpioget gpiochip3 0
+	0
+
+4. gpioset:
+
+	Turn on all HPS LEDS:
+	$gpioset gpiochip0 19=1 20=1 21=1
+
+	Turn off all HPS LEDS:
+	$gpioset gpiochip0 19=0 20=0 21=0
+
+	Turn off all FPGA LEDS:
+	$gpioset gpiochip1 0=1 1=1 2=1
+
+	Turn on all FPGA LEDS:
+	$gpioset gpiochip1 0=0 1=0 2=0
+
+	Note: Remove gpio pin definitions from the devicetree at uboot level
+		  for setting the gpio's using gpioset.
+
+	Steps to remove:
+	----------------
+	Stop uboot at the 'autoboot' and execute these commands on
+	uboot command line.
+
+		SOCFPGA_AGILEX # load mmc 0:1 ${loadaddr} kernel.itb
+
+		SOCFPGA_AGILEX # imxtract ${loadaddr} fpga-4 01000000
+		SOCFPGA_AGILEX # bridge disable
+		SOCFPGA_AGILEX # fpga load 0 01000000 ${filesize}
+		SOCFPGA_AGILEX # bridge enable
+
+		SOCFPGA_AGILEX # fdt addr ${loadaddr}
+		SOCFPGA_AGILEX # fdt get addr KERNEL_ADDR /images/kernel data
+		SOCFPGA_AGILEX # lzmadec ${KERNEL_ADDR} 08000000
+
+		SOCFPGA_AGILEX # imxtract ${loadaddr} fdt-4 ${fdt_addr_r}
+		SOCFPGA_AGILEX # fdt addr ${fdt_addr_r}
+		SOCFPGA_AGILEX # fdt rm /leds
+		SOCFPGA_AGILEX # fdt rm /soc/leds
+
+		SOCFPGA_AGILEX # setenv bootargs 'earlycon panic=-1 root=/dev/mmcblk0p2 rw rootwait'
+		SOCFPGA_AGILEX # booti 08000000 - ${fdt_addr_r}	           <-- Linux Start's
+
+5. gpiomon:
+
+	Description:
+
+		This user space tool is used  to effectively monitor and respond to
+		interrupts generated by the GPIO lines in the Linux kernel.
+
+		1. gpiomon configures the GPIO line to be monitored for interrupts by
+		   setting the trigger edge using the ioctl calls via gpiolib framework.
+
+		2. gpiolib framework registers corresponding interrupt handler for
+		   specific gpioline (based on the configured edge condition)
+
+		3. When interrupt is generated the monitored GPIO line h/w sends a
+		   signal to the corresponding GPIO controller which in turn triggers
+		   an interrupt associated with the GPIO controller which will raise
+		   IRQ in kernel.
+
+		4. Kernel IRQ handling mechanism identifies the IRQ and trigger the
+		   registered interrupt handler(gpiolib framework)
+
+		5. IRQ handler run in kernel context and execute the necessary actions
+		   (if needed communicates with gpiolib process through IPC, which
+		   in turn receives the notifications and perform desired actions)
+
+	Monitor the GPIO interrupts:
+
+	Change the SW2.1 to OFF and then observe the interrupts.
+	$gpiomon -r -f gpiochip3 0 1 2 3
+		event: FALLING EDGE offset: 1 timestamp: [     432.689049662]
+		event: FALLING EDGE offset: 1 timestamp: [     437.172475810]
+		event: FALLING EDGE offset: 0 timestamp: [     441.852493755]
+
+	Press either S1, S2, S3 or S4 and then observe the interrupts.
+	$gpiomon -f gpiochip2 0 1 2 3
+		event: FALLING EDGE offset: 1 timestamp: [    1073.168942534]
+		event: FALLING EDGE offset: 1 timestamp: [    1077.234552169]
+		event: FALLING EDGE offset: 1 timestamp: [    1078.532731679]
+		event: FALLING EDGE offset: 2 timestamp: [    1079.916817302]
+		event: FALLING EDGE offset: 3 timestamp: [    1081.832370472]
+		event: FALLING EDGE offset: 0 timestamp: [    1088.255693397]
+		event: FALLING EDGE offset: 0 timestamp: [    1089.995351507]
 
