@@ -1,0 +1,121 @@
+
+Table of Contents
+=================
+1. Overview
+2. Write SD image
+3. u-boot commands
+4. Linux commands
+5. Demonstrating ILC functionality
+6. Conclusion
+
+1. Overview
+===========
+We are showcasing the ILC functionality using custom gpio driver. To do this,
+we need minimal modifications to the existing GSRD images. We are utilizing
+the Agilex SoC DK production board for this demonstration.
+
+2. Write SD image
+=================
+Download sdimage.tar.gz file from given below link.
+
+https://releases.rocketboards.org/2023.04/gsrd/agilex_fm_61_gsrd/sdimage.tar.gz
+
+Write sdimage.tar.gz file to the SD card. Once the SD card image has been
+created, insert the card into the SD slot of the Micro SD daughter card.
+And power on the board, stop u-boot at the 'autoboot' and execute these
+commands on u-boot command line.
+
+3. u-boot command
+=================
+Once you arrive at the u-boot console prompt, perform the following
+actions to boot into our new kernel environment.
+
+Configure the FPGA core.rbf:
+
+	$ load mmc 0:1 ${loadaddr} kernel.itb
+
+	$ imxtract ${loadaddr} fpga-4 01000000
+
+	$ fpga load 0 01000000 ${filesize}
+
+	$ bridge enable
+
+Load the kernel and devicetree into memory:
+
+	$ fdt addr ${loadaddr}
+
+	$ fdt get addr KERNEL_ADDR /images/kernel data
+
+	$ lzmadec ${KERNEL_ADDR} 08000000
+
+	$ imxtract ${loadaddr} fdt-4 ${fdt_addr_r}
+
+	$ fdt addr ${fdt_addr_r}
+
+	$ fdt set /soc/gpio@f9001060 compatible "intel,pio-ilc"
+
+	$ fdt set /soc/ilc@f9001100 status "okay"
+
+Configure the kernel boot parameters and boot the kernel:
+
+	$ setenv bootargs "earlycon panic=-1 root=${mmcroot} rw rootwait"
+
+	$ booti 08000000 - ${fdt_addr_r}
+
+4. Linux commands
+=================
+Once you arrive at the Linux console prompt, the following commands
+may be of interest.
+
+We should also see evidence of the Interrupt Latency Counter driver as well
+as our pio_ilc driver that we added, both modules should have loaded
+and installed IRQ handlers:
+
+	$ lsmod | grep ilc
+	intel_pio_ilc            16384  0
+	altera_ilc               16384  0
+
+	$ cat /proc/interrupts | grep ilc
+	39:     0      0      0      0    GICv2  50 Level   ilc_0, pio_ilc_0
+
+We can dump the irq count of our pio_ilc driver like this:
+
+	$ cat /sys/devices/platform/soc/f9001060.gpio/pio_ilc_data/39
+	0
+
+We can dump the ILC driver count FIFO like this:
+
+	$ cat /sys/devices/platform/soc/f9001100.ilc/ilc_data/39
+	[  387.952999] altera_ilc f9001100.ilc: Fifo for interrupt 39 is empty
+
+5. Demonstrating ILC functionality
+==================================
+If our system appears to be working properly, we can demonstrate the
+ILC functionality on our general interrupts like this:
+
+Press the FPGA PB0 push button on the board 4 times(User FPGA push buttons
+pin 0 -- S1).
+
+Dump the IRQ counts. We expect to see the pio_ilc driver register 4 events
+and we expect the kernel to report 4 IRQs being handled by CPU0:
+
+	$ cat /sys/devices/platform/soc/f9001060.gpio/pio_ilc_data/39
+	4
+
+	$ cat /proc/interrupts | grep 'CPU[0-3]\|ilc'
+	     CPU0    CPU1    CPU2    CPU3
+	39:   4       0       0       0     GICv2  50 Level    pio_ilc_0, ilc_0
+
+Dump the ILC latency count FIFO. These values represent clock cycles
+at 100MHz, or 10ns:
+
+	$ cat /sys/devices/platform/soc/f9001100.ilc/ilc_data/39
+	628
+	336
+	354
+	338
+
+6. Conclusion
+=============
+This demonstrates the ILC functionality with the custom gpio driver.
+User can check the latency data values from the ilc counter.
