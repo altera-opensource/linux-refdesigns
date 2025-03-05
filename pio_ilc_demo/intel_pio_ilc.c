@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (C) 2023 Intel Corporation <www.intel.com>
+ * Copyright (C) 2025 Altera Corporation
  *
  */
 
@@ -108,7 +109,7 @@ static int intel_pio_ilc_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int intel_pio_ilc_remove(struct platform_device *pdev)
+static void intel_pio_ilc_remove(struct platform_device *pdev)
 {
 	struct intel_pio_ilc *pio_ilc = platform_get_drvdata(pdev);
 
@@ -119,7 +120,6 @@ static int intel_pio_ilc_remove(struct platform_device *pdev)
 	sysfs_remove_group(&pdev->dev.kobj, &intel_pio_ilc_attr_group);
 
 	platform_set_drvdata(pdev, NULL);
-	return 0;
 }
 
 static const struct of_device_id intel_pio_ilc_match[] = {
